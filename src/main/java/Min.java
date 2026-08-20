@@ -6,15 +6,6 @@ public class Min {
     private static final int SEPARATOR_LENGTH = 60;
     private static final String SEPARATOR = "_".repeat(SEPARATOR_LENGTH);
 
-    private static final String EXIT_COMMAND = "bye";
-    private static final String LIST_COMMAND = "list";
-    private static final String MARK_COMMAND = "mark";
-    private static final String UNMARK_COMMAND = "unmark";
-    private static final String DELETE_COMMAND = "delete";
-    private static final String TODO_COMMAND = "todo";
-    private static final String DEADLINE_COMMAND = "deadline";
-    private static final String EVENT_COMMAND = "event";
-
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
@@ -27,6 +18,28 @@ public class Min {
             "Invalid deadline. Use: deadline <description> /by <time>.";
     private static final String INVALID_COMMAND_MESSAGE =
             "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
+
+    // Represents the command words Min accepts.
+    private enum Command {
+        BYE("bye"),
+        LIST("list"),
+        MARK("mark"),
+        UNMARK("unmark"),
+        DELETE("delete"),
+        TODO("todo"),
+        DEADLINE("deadline"),
+        EVENT("event");
+
+        private final String word;
+
+        Command(String word) {
+            this.word = word;
+        }
+
+        private String getWord() {
+            return word;
+        }
+    }
 
     // Runs the chatbot and handles user commands.
     public static void main(String[] args) {
@@ -49,43 +62,44 @@ public class Min {
             System.out.println(SEPARATOR);
 
             try {
-                if (command.equals(EXIT_COMMAND)) {
+                if (command.equals(Command.BYE.getWord())) {
                     System.out.println(" Bye. Hope to see you again soon!");
                     System.out.println(SEPARATOR);
                     break;
-                } else if (command.equals(LIST_COMMAND)) {
+                } else if (command.equals(Command.LIST.getWord())) {
                     System.out.println("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.println(" " + (i + 1) + "." + tasks.get(i));
                     }
                     System.out.println(SEPARATOR);
-                } else if (isCommand(command, MARK_COMMAND)) {
-                    int taskNumber = getTaskNumber(command, MARK_COMMAND, tasks.size());
+                } else if (isCommand(command, Command.MARK)) {
+                    int taskNumber = getTaskNumber(command, Command.MARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("   " + task);
                     System.out.println(SEPARATOR);
-                } else if (isCommand(command, UNMARK_COMMAND)) {
-                    int taskNumber = getTaskNumber(command, UNMARK_COMMAND, tasks.size());
+                } else if (isCommand(command, Command.UNMARK)) {
+                    int taskNumber = getTaskNumber(command, Command.UNMARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("   " + task);
                     System.out.println(SEPARATOR);
-                } else if (isCommand(command, DELETE_COMMAND)) {
-                    int taskNumber = getTaskNumber(command, DELETE_COMMAND, tasks.size());
+                } else if (isCommand(command, Command.DELETE)) {
+                    int taskNumber = getTaskNumber(command, Command.DELETE, tasks.size());
                     Task removedTask = tasks.remove(taskNumber - 1);
                     printDeletedTask(removedTask, tasks.size());
                     System.out.println(SEPARATOR);
-                } else if (isCommand(command, TODO_COMMAND)) {
-                    String description = command.substring(TODO_COMMAND.length()).trim();
+                } else if (isCommand(command, Command.TODO)) {
+                    String description = command.substring(Command.TODO.getWord().length()).trim();
                     if (description.isEmpty()) {
                         throw new MinException(INVALID_TODO_MESSAGE);
                     }
                     addTask(tasks, new Todo(description));
-                } else if (isCommand(command, DEADLINE_COMMAND)) {
-                    String deadlineDetails = command.substring(DEADLINE_COMMAND.length()).trim();
+                } else if (isCommand(command, Command.DEADLINE)) {
+                    String deadlineDetails =
+                            command.substring(Command.DEADLINE.getWord().length()).trim();
                     int byIndex = deadlineDetails.indexOf(BY_SEPARATOR);
                     if (byIndex == -1) {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
@@ -96,8 +110,9 @@ public class Min {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
                     addTask(tasks, new Deadline(description, by));
-                } else if (isCommand(command, EVENT_COMMAND)) {
-                    String eventDetails = command.substring(EVENT_COMMAND.length()).trim();
+                } else if (isCommand(command, Command.EVENT)) {
+                    String eventDetails =
+                            command.substring(Command.EVENT.getWord().length()).trim();
                     int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
                     if (fromIndex == -1) {
                         throw new MinException(INVALID_EVENT_MESSAGE);
@@ -145,14 +160,16 @@ public class Min {
     }
 
     // Checks whether the input contains a command word with an optional argument.
-    private static boolean isCommand(String input, String commandWord) {
+    private static boolean isCommand(String input, Command command) {
+        String commandWord = command.getWord();
         return input.equals(commandWord) || input.startsWith(commandWord + " ");
     }
 
-    // Gets a valid task number from a mark or unmark command.
-    private static int getTaskNumber(String command, String commandWord, int taskCount)
+    // Gets a valid task number from a numbered task command.
+    private static int getTaskNumber(String input, Command command, int taskCount)
             throws MinException {
-        String taskNumberText = command.substring(commandWord.length()).trim();
+        String commandWord = command.getWord();
+        String taskNumberText = input.substring(commandWord.length()).trim();
         if (taskNumberText.isEmpty()) {
             throw new MinException("Please provide a task number to " + commandWord + ".");
         }
