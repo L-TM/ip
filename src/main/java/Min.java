@@ -1,15 +1,16 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /** Runs the Min chatbot. */
 public class Min {
     private static final int SEPARATOR_LENGTH = 60;
-    private static final int MAX_TASKS = 100;
     private static final String SEPARATOR = "_".repeat(SEPARATOR_LENGTH);
 
     private static final String EXIT_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark";
     private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
     private static final String TODO_COMMAND = "todo";
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
@@ -25,15 +26,12 @@ public class Min {
     private static final String INVALID_DEADLINE_MESSAGE =
             "Invalid deadline. Use: deadline <description> /by <time>.";
     private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, mark, unmark, todo, deadline, or event.";
-    private static final String TASK_LIST_FULL_MESSAGE =
-            "Task list is full. You can store up to " + MAX_TASKS + " tasks.";
+            "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
 
     // Runs the chatbot and handles user commands.
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -57,28 +55,35 @@ public class Min {
                     break;
                 } else if (command.equals(LIST_COMMAND)) {
                     System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println(" " + (i + 1) + "." + tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println(" " + (i + 1) + "." + tasks.get(i));
                     }
                     System.out.println(SEPARATOR);
                 } else if (isCommand(command, MARK_COMMAND)) {
-                    int taskNumber = getTaskNumber(command, MARK_COMMAND, taskCount);
-                    tasks[taskNumber - 1].markAsDone();
+                    int taskNumber = getTaskNumber(command, MARK_COMMAND, tasks.size());
+                    Task task = tasks.get(taskNumber - 1);
+                    task.markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("   " + tasks[taskNumber - 1]);
+                    System.out.println("   " + task);
                     System.out.println(SEPARATOR);
                 } else if (isCommand(command, UNMARK_COMMAND)) {
-                    int taskNumber = getTaskNumber(command, UNMARK_COMMAND, taskCount);
-                    tasks[taskNumber - 1].markAsNotDone();
+                    int taskNumber = getTaskNumber(command, UNMARK_COMMAND, tasks.size());
+                    Task task = tasks.get(taskNumber - 1);
+                    task.markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("   " + tasks[taskNumber - 1]);
+                    System.out.println("   " + task);
+                    System.out.println(SEPARATOR);
+                } else if (isCommand(command, DELETE_COMMAND)) {
+                    int taskNumber = getTaskNumber(command, DELETE_COMMAND, tasks.size());
+                    Task removedTask = tasks.remove(taskNumber - 1);
+                    printDeletedTask(removedTask, tasks.size());
                     System.out.println(SEPARATOR);
                 } else if (isCommand(command, TODO_COMMAND)) {
                     String description = command.substring(TODO_COMMAND.length()).trim();
                     if (description.isEmpty()) {
                         throw new MinException(INVALID_TODO_MESSAGE);
                     }
-                    taskCount = addTask(tasks, taskCount, new Todo(description));
+                    addTask(tasks, new Todo(description));
                 } else if (isCommand(command, DEADLINE_COMMAND)) {
                     String deadlineDetails = command.substring(DEADLINE_COMMAND.length()).trim();
                     int byIndex = deadlineDetails.indexOf(BY_SEPARATOR);
@@ -90,7 +95,7 @@ public class Min {
                     if (description.isEmpty() || by.isEmpty()) {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
-                    taskCount = addTask(tasks, taskCount, new Deadline(description, by));
+                    addTask(tasks, new Deadline(description, by));
                 } else if (isCommand(command, EVENT_COMMAND)) {
                     String eventDetails = command.substring(EVENT_COMMAND.length()).trim();
                     int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
@@ -108,7 +113,7 @@ public class Min {
                     if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                         throw new MinException(INVALID_EVENT_MESSAGE);
                     }
-                    taskCount = addTask(tasks, taskCount, new Event(description, from, to));
+                    addTask(tasks, new Event(description, from, to));
                 } else {
                     throw new MinException(INVALID_COMMAND_MESSAGE);
                 }
@@ -118,19 +123,23 @@ public class Min {
         }
     }
 
-    // Adds a task, prints its confirmation, and returns the new task count.
-    private static int addTask(Task[] tasks, int taskCount, Task task) throws MinException {
-        ensureTaskListHasRoom(taskCount);
-        tasks[taskCount] = task;
-        taskCount++;
-        printAddedTask(task, taskCount);
+    // Adds a task and prints its confirmation.
+    private static void addTask(ArrayList<Task> tasks, Task task) {
+        tasks.add(task);
+        printAddedTask(task, tasks.size());
         System.out.println(SEPARATOR);
-        return taskCount;
     }
 
     // Prints a confirmation after adding a task.
     private static void printAddedTask(Task task, int taskCount) {
         System.out.println(" Got it. I've added this task:");
+        System.out.println("   " + task);
+        System.out.println(" Now you have " + taskCount + " tasks in the list.");
+    }
+
+    // Prints a confirmation after deleting a task.
+    private static void printDeletedTask(Task task, int taskCount) {
+        System.out.println(" Got it. I've removed this task:");
         System.out.println("   " + task);
         System.out.println(" Now you have " + taskCount + " tasks in the list.");
     }
@@ -159,13 +168,6 @@ public class Min {
             return taskNumber;
         } catch (NumberFormatException e) {
             throw new MinException("The task number must be a whole number.");
-        }
-    }
-
-    // Checks whether another task can be stored in the task list.
-    private static void ensureTaskListHasRoom(int taskCount) throws MinException {
-        if (taskCount >= MAX_TASKS) {
-            throw new MinException(TASK_LIST_FULL_MESSAGE);
         }
     }
 
