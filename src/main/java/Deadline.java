@@ -8,6 +8,12 @@ public class Deadline extends Task {
     }
 
     @Override
+    public String toFileString() {
+        return "D" + FILE_FIELD_SEPARATOR + getStatusValue() + FILE_FIELD_SEPARATOR
+                + getDescription() + FILE_FIELD_SEPARATOR + by;
+    }
+
+    @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by + ")";
     }

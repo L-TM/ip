@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -45,6 +46,7 @@ public class Min {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ArrayList<Task> tasks = new ArrayList<>();
+        Storage storage = new Storage();
 
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -76,6 +78,7 @@ public class Min {
                     int taskNumber = getTaskNumber(command, Command.MARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsDone();
+                    storage.save(tasks);
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("   " + task);
                     System.out.println(SEPARATOR);
@@ -83,12 +86,14 @@ public class Min {
                     int taskNumber = getTaskNumber(command, Command.UNMARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsNotDone();
+                    storage.save(tasks);
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("   " + task);
                     System.out.println(SEPARATOR);
                 } else if (isCommand(command, Command.DELETE)) {
                     int taskNumber = getTaskNumber(command, Command.DELETE, tasks.size());
                     Task removedTask = tasks.remove(taskNumber - 1);
+                    storage.save(tasks);
                     printDeletedTask(removedTask, tasks.size());
                     System.out.println(SEPARATOR);
                 } else if (isCommand(command, Command.TODO)) {
@@ -96,7 +101,7 @@ public class Min {
                     if (description.isEmpty()) {
                         throw new MinException(INVALID_TODO_MESSAGE);
                     }
-                    addTask(tasks, new Todo(description));
+                    addTask(tasks, new Todo(description), storage);
                 } else if (isCommand(command, Command.DEADLINE)) {
                     String deadlineDetails =
                             command.substring(Command.DEADLINE.getWord().length()).trim();
@@ -109,7 +114,7 @@ public class Min {
                     if (description.isEmpty() || by.isEmpty()) {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
-                    addTask(tasks, new Deadline(description, by));
+                    addTask(tasks, new Deadline(description, by), storage);
                 } else if (isCommand(command, Command.EVENT)) {
                     String eventDetails =
                             command.substring(Command.EVENT.getWord().length()).trim();
@@ -128,19 +133,23 @@ public class Min {
                     if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                         throw new MinException(INVALID_EVENT_MESSAGE);
                     }
-                    addTask(tasks, new Event(description, from, to));
+                    addTask(tasks, new Event(description, from, to), storage);
                 } else {
                     throw new MinException(INVALID_COMMAND_MESSAGE);
                 }
             } catch (MinException e) {
                 printError(e.getMessage());
+            } catch (IOException e) {
+                printError("Unable to save tasks.");
             }
         }
     }
 
     // Adds a task and prints its confirmation.
-    private static void addTask(ArrayList<Task> tasks, Task task) {
+    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage)
+            throws IOException {
         tasks.add(task);
+        storage.save(tasks);
         printAddedTask(task, tasks.size());
         System.out.println(SEPARATOR);
     }
