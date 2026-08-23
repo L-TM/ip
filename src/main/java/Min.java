@@ -45,8 +45,8 @@ public class Min {
     // Runs the chatbot and handles user commands.
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Task> tasks = new ArrayList<>();
         Storage storage = new Storage();
+        ArrayList<Task> tasks = loadTasks(storage);
 
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -142,6 +142,16 @@ public class Min {
             } catch (IOException e) {
                 printError("Unable to save tasks.");
             }
+        }
+    }
+
+    // Loads saved tasks or starts with an empty list when loading fails.
+    private static ArrayList<Task> loadTasks(Storage storage) {
+        try {
+            return storage.load();
+        } catch (IOException e) {
+            printError("Unable to load tasks.");
+            return new ArrayList<>();
         }
     }
 
