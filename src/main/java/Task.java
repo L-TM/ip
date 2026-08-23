@@ -1,4 +1,6 @@
-public class Task {
+public abstract class Task {
+    protected static final String FILE_FIELD_SEPARATOR = " | ";
+
     private String description;
     private boolean isDone;
 
@@ -22,6 +24,12 @@ public class Task {
     public void markAsNotDone() {
         isDone = false;
     }
+
+    protected String getStatusValue() {
+        return isDone ? "1" : "0";
+    }
+
+    public abstract String toFileString();
 
     @Override
     public String toString() {
