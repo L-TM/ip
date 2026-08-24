@@ -1,4 +1,7 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -16,7 +19,11 @@ public class Min {
     private static final String INVALID_TODO_MESSAGE =
             "A todo needs a description. Use: todo <description>.";
     private static final String INVALID_DEADLINE_MESSAGE =
-            "Invalid deadline. Use: deadline <description> /by <time>.";
+            "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
+    private static final String INVALID_DEADLINE_DATE_MESSAGE =
+            "Invalid deadline date. Use yyyy-mm-dd.";
+    private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
+            "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
     private static final String INVALID_COMMAND_MESSAGE =
             "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
 
@@ -46,7 +53,16 @@ public class Min {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Storage storage = new Storage();
-        ArrayList<Task> tasks = loadTasks(storage);
+        ArrayList<Task> tasks;
+        try {
+            tasks = loadTasks(storage);
+        } catch (MinException e) {
+            printError(e.getMessage());
+            return;
+        } catch (IOException e) {
+            printError("Unable to load tasks.");
+            return;
+        }
 
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -110,10 +126,12 @@ public class Min {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
                     String description = deadlineDetails.substring(0, byIndex).trim();
-                    String by = deadlineDetails.substring(byIndex + BY_SEPARATOR.length()).trim();
-                    if (description.isEmpty() || by.isEmpty()) {
+                    String byText =
+                            deadlineDetails.substring(byIndex + BY_SEPARATOR.length()).trim();
+                    if (description.isEmpty() || byText.isEmpty()) {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
+                    LocalDate by = parseDeadlineDate(byText);
                     addTask(tasks, new Deadline(description, by), storage);
                 } else if (isCommand(command, Command.EVENT)) {
                     String eventDetails =
@@ -145,13 +163,12 @@ public class Min {
         }
     }
 
-    // Loads saved tasks or starts with an empty list when loading fails.
-    private static ArrayList<Task> loadTasks(Storage storage) {
+    // Loads saved tasks and reports incompatible deadline dates.
+    private static ArrayList<Task> loadTasks(Storage storage) throws IOException, MinException {
         try {
             return storage.load();
-        } catch (IOException e) {
-            printError("Unable to load tasks.");
-            return new ArrayList<>();
+        } catch (DateTimeParseException e) {
+            throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
         }
     }
 
@@ -162,6 +179,15 @@ public class Min {
         storage.save(tasks);
         printAddedTask(task, tasks.size());
         System.out.println(SEPARATOR);
+    }
+
+    // Parses a deadline date in the required ISO format.
+    private static LocalDate parseDeadlineDate(String dateText) throws MinException {
+        try {
+            return LocalDate.parse(dateText, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            throw new MinException(INVALID_DEADLINE_DATE_MESSAGE);
+        }
     }
 
     // Prints a confirmation after adding a task.
