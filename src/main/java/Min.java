@@ -22,6 +22,8 @@ public class Min {
             "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
     private static final String INVALID_DEADLINE_DATE_MESSAGE =
             "Invalid deadline date. Use yyyy-mm-dd.";
+    private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
+            "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
     private static final String INVALID_COMMAND_MESSAGE =
             "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
 
@@ -51,7 +53,16 @@ public class Min {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         Storage storage = new Storage();
-        ArrayList<Task> tasks = loadTasks(storage);
+        ArrayList<Task> tasks;
+        try {
+            tasks = loadTasks(storage);
+        } catch (MinException e) {
+            printError(e.getMessage());
+            return;
+        } catch (IOException e) {
+            printError("Unable to load tasks.");
+            return;
+        }
 
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -152,13 +163,12 @@ public class Min {
         }
     }
 
-    // Loads saved tasks or starts with an empty list when loading fails.
-    private static ArrayList<Task> loadTasks(Storage storage) {
+    // Loads saved tasks and reports incompatible deadline dates.
+    private static ArrayList<Task> loadTasks(Storage storage) throws IOException, MinException {
         try {
             return storage.load();
-        } catch (IOException e) {
-            printError("Unable to load tasks.");
-            return new ArrayList<>();
+        } catch (DateTimeParseException e) {
+            throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
         }
     }
 
