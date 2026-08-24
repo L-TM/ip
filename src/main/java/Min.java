@@ -3,13 +3,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 /** Runs the Min chatbot. */
 public class Min {
-    private static final int SEPARATOR_LENGTH = 60;
-    private static final String SEPARATOR = "_".repeat(SEPARATOR_LENGTH);
-
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
@@ -45,79 +41,60 @@ public class Min {
         }
 
         private String getWord() {
-            return word;
+            return this.word;
         }
     }
 
     // Runs the chatbot and handles user commands.
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Ui ui = new Ui();
         Storage storage = new Storage();
         ArrayList<Task> tasks;
         try {
             tasks = loadTasks(storage);
         } catch (MinException e) {
-            printError(e.getMessage());
+            ui.showError(e.getMessage());
             return;
         } catch (IOException e) {
-            printError("Unable to load tasks.");
+            ui.showError("Unable to load tasks.");
             return;
         }
 
-        String banner = " __  __ _       \n"
-                + "|  \\/  (_)_ __  \n"
-                + "| |\\/| | | '_ \\ \n"
-                + "| |  | | | | | |\n"
-                + "|_|  |_|_|_| |_|\n";
-        System.out.println(banner);
-        System.out.println(SEPARATOR);
-        System.out.println("Hello! I'm Min.");
-        System.out.println("What can I do for you?");
-        System.out.println(SEPARATOR);
+        ui.showWelcome();
 
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().trim();
-            System.out.println(SEPARATOR);
+        while (ui.hasNextCommand()) {
+            String command = ui.readCommand();
+            ui.showLine();
 
             try {
                 if (command.equals(Command.BYE.getWord())) {
-                    System.out.println(" Bye. Hope to see you again soon!");
-                    System.out.println(SEPARATOR);
+                    ui.showGoodbye();
                     break;
                 } else if (command.equals(Command.LIST.getWord())) {
-                    System.out.println("Here are the tasks in your list:");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println(" " + (i + 1) + "." + tasks.get(i));
-                    }
-                    System.out.println(SEPARATOR);
+                    ui.showTaskList(tasks);
                 } else if (isCommand(command, Command.MARK)) {
                     int taskNumber = getTaskNumber(command, Command.MARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsDone();
                     storage.save(tasks);
-                    System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("   " + task);
-                    System.out.println(SEPARATOR);
+                    ui.showTaskMarked(task);
                 } else if (isCommand(command, Command.UNMARK)) {
                     int taskNumber = getTaskNumber(command, Command.UNMARK, tasks.size());
                     Task task = tasks.get(taskNumber - 1);
                     task.markAsNotDone();
                     storage.save(tasks);
-                    System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("   " + task);
-                    System.out.println(SEPARATOR);
+                    ui.showTaskUnmarked(task);
                 } else if (isCommand(command, Command.DELETE)) {
                     int taskNumber = getTaskNumber(command, Command.DELETE, tasks.size());
                     Task removedTask = tasks.remove(taskNumber - 1);
                     storage.save(tasks);
-                    printDeletedTask(removedTask, tasks.size());
-                    System.out.println(SEPARATOR);
+                    ui.showTaskDeleted(removedTask, tasks.size());
                 } else if (isCommand(command, Command.TODO)) {
                     String description = command.substring(Command.TODO.getWord().length()).trim();
                     if (description.isEmpty()) {
                         throw new MinException(INVALID_TODO_MESSAGE);
                     }
-                    addTask(tasks, new Todo(description), storage);
+                    addTask(tasks, new Todo(description), storage, ui);
                 } else if (isCommand(command, Command.DEADLINE)) {
                     String deadlineDetails =
                             command.substring(Command.DEADLINE.getWord().length()).trim();
@@ -132,7 +109,7 @@ public class Min {
                         throw new MinException(INVALID_DEADLINE_MESSAGE);
                     }
                     LocalDate by = parseDeadlineDate(byText);
-                    addTask(tasks, new Deadline(description, by), storage);
+                    addTask(tasks, new Deadline(description, by), storage, ui);
                 } else if (isCommand(command, Command.EVENT)) {
                     String eventDetails =
                             command.substring(Command.EVENT.getWord().length()).trim();
@@ -151,14 +128,14 @@ public class Min {
                     if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                         throw new MinException(INVALID_EVENT_MESSAGE);
                     }
-                    addTask(tasks, new Event(description, from, to), storage);
+                    addTask(tasks, new Event(description, from, to), storage, ui);
                 } else {
                     throw new MinException(INVALID_COMMAND_MESSAGE);
                 }
             } catch (MinException e) {
-                printError(e.getMessage());
+                ui.showError(e.getMessage());
             } catch (IOException e) {
-                printError("Unable to save tasks.");
+                ui.showError("Unable to save tasks.");
             }
         }
     }
@@ -172,13 +149,12 @@ public class Min {
         }
     }
 
-    // Adds a task and prints its confirmation.
-    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage)
+    // Adds a task and displays its confirmation.
+    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage, Ui ui)
             throws IOException {
         tasks.add(task);
         storage.save(tasks);
-        printAddedTask(task, tasks.size());
-        System.out.println(SEPARATOR);
+        ui.showTaskAdded(task, tasks.size());
     }
 
     // Parses a deadline date in the required ISO format.
@@ -188,20 +164,6 @@ public class Min {
         } catch (DateTimeParseException e) {
             throw new MinException(INVALID_DEADLINE_DATE_MESSAGE);
         }
-    }
-
-    // Prints a confirmation after adding a task.
-    private static void printAddedTask(Task task, int taskCount) {
-        System.out.println(" Got it. I've added this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
-    }
-
-    // Prints a confirmation after deleting a task.
-    private static void printDeletedTask(Task task, int taskCount) {
-        System.out.println(" Got it. I've removed this task:");
-        System.out.println("   " + task);
-        System.out.println(" Now you have " + taskCount + " tasks in the list.");
     }
 
     // Checks whether the input contains a command word with an optional argument.
@@ -231,11 +193,5 @@ public class Min {
         } catch (NumberFormatException e) {
             throw new MinException("The task number must be a whole number.");
         }
-    }
-
-    // Prints an error message followed by the standard separator.
-    private static void printError(String message) {
-        System.out.println(" " + message);
-        System.out.println(SEPARATOR);
     }
 }
