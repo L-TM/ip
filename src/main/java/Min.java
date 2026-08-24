@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 
 /** Runs the Min chatbot. */
 public class Min {
@@ -49,7 +48,7 @@ public class Min {
     public static void main(String[] args) {
         Ui ui = new Ui();
         Storage storage = new Storage();
-        ArrayList<Task> tasks;
+        TaskList tasks;
         try {
             tasks = loadTasks(storage);
         } catch (MinException e) {
@@ -71,23 +70,21 @@ public class Min {
                     ui.showGoodbye();
                     break;
                 } else if (command.equals(Command.LIST.getWord())) {
-                    ui.showTaskList(tasks);
+                    ui.showTaskList(tasks.getTasks());
                 } else if (isCommand(command, Command.MARK)) {
                     int taskNumber = getTaskNumber(command, Command.MARK, tasks.size());
-                    Task task = tasks.get(taskNumber - 1);
-                    task.markAsDone();
-                    storage.save(tasks);
+                    Task task = tasks.markTask(taskNumber - 1);
+                    storage.save(tasks.getTasks());
                     ui.showTaskMarked(task);
                 } else if (isCommand(command, Command.UNMARK)) {
                     int taskNumber = getTaskNumber(command, Command.UNMARK, tasks.size());
-                    Task task = tasks.get(taskNumber - 1);
-                    task.markAsNotDone();
-                    storage.save(tasks);
+                    Task task = tasks.unmarkTask(taskNumber - 1);
+                    storage.save(tasks.getTasks());
                     ui.showTaskUnmarked(task);
                 } else if (isCommand(command, Command.DELETE)) {
                     int taskNumber = getTaskNumber(command, Command.DELETE, tasks.size());
-                    Task removedTask = tasks.remove(taskNumber - 1);
-                    storage.save(tasks);
+                    Task removedTask = tasks.deleteTask(taskNumber - 1);
+                    storage.save(tasks.getTasks());
                     ui.showTaskDeleted(removedTask, tasks.size());
                 } else if (isCommand(command, Command.TODO)) {
                     String description = command.substring(Command.TODO.getWord().length()).trim();
@@ -141,19 +138,19 @@ public class Min {
     }
 
     // Loads saved tasks and reports incompatible deadline dates.
-    private static ArrayList<Task> loadTasks(Storage storage) throws IOException, MinException {
+    private static TaskList loadTasks(Storage storage) throws IOException, MinException {
         try {
-            return storage.load();
+            return new TaskList(storage.load());
         } catch (DateTimeParseException e) {
             throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
         }
     }
 
     // Adds a task and displays its confirmation.
-    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage, Ui ui)
+    private static void addTask(TaskList tasks, Task task, Storage storage, Ui ui)
             throws IOException {
-        tasks.add(task);
-        storage.save(tasks);
+        tasks.addTask(task);
+        storage.save(tasks.getTasks());
         ui.showTaskAdded(task, tasks.size());
     }
 
