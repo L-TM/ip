@@ -1,0 +1,45 @@
+import java.util.ArrayList;
+import java.util.List;
+
+// Stores and updates Min's tasks.
+public class TaskList {
+    private final List<Task> tasks;
+
+    public TaskList(List<Task> tasks) {
+        this.tasks = new ArrayList<>(tasks);
+    }
+
+    // Adds a task to the list.
+    public void addTask(Task task) {
+        this.tasks.add(task);
+    }
+
+    // Marks the task at the given index as done.
+    public Task markTask(int index) {
+        Task task = this.tasks.get(index);
+        task.markAsDone();
+        return task;
+    }
+
+    // Marks the task at the given index as not done.
+    public Task unmarkTask(int index) {
+        Task task = this.tasks.get(index);
+        task.markAsNotDone();
+        return task;
+    }
+
+    // Removes and returns the task at the given index.
+    public Task deleteTask(int index) {
+        return this.tasks.remove(index);
+    }
+
+    // Returns the number of tasks in the list.
+    public int size() {
+        return this.tasks.size();
+    }
+
+    // Returns a read-only snapshot of the current tasks.
+    public List<Task> getTasks() {
+        return List.copyOf(this.tasks);
+    }
+}
