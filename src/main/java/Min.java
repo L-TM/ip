@@ -6,7 +6,11 @@ public class Min {
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
 
-    // Runs the chatbot and handles user commands.
+    /**
+     * Runs the chatbot and handles user commands.
+     *
+     * @param args Command-line arguments, which Min does not use.
+     */
     public static void main(String[] args) {
         Ui ui = new Ui();
         Parser parser = new Parser();
@@ -40,7 +44,14 @@ public class Min {
         }
     }
 
-    // Loads saved tasks and reports incompatible deadline dates.
+    /**
+     * Loads saved tasks and reports incompatible deadline dates.
+     *
+     * @param storage The storage used to load tasks.
+     * @return The loaded tasks.
+     * @throws IOException If the saved task data cannot be read.
+     * @throws MinException If a saved deadline date is invalid.
+     */
     private static TaskList loadTasks(Storage storage) throws IOException, MinException {
         try {
             return new TaskList(storage.load());
@@ -49,7 +60,15 @@ public class Min {
         }
     }
 
-    // Adds a task and displays its confirmation.
+    /**
+     * Adds a task, saves the updated list, and displays its confirmation.
+     *
+     * @param tasks The task list to update.
+     * @param task The task to add.
+     * @param storage The storage used to save the task list.
+     * @param ui The user interface used to show the confirmation.
+     * @throws IOException If the task list cannot be saved.
+     */
     private static void addTask(TaskList tasks, Task task, Storage storage, Ui ui)
             throws IOException {
         tasks.addTask(task);
@@ -57,7 +76,18 @@ public class Min {
         ui.showTaskAdded(task, tasks.size());
     }
 
-    // Executes one command and reports whether Min should continue running.
+    /**
+     * Executes one command and reports whether Min should continue running.
+     *
+     * @param input The command entered by the user.
+     * @param parser The parser used to interpret the command.
+     * @param tasks The task list to update or display.
+     * @param storage The storage used to save task changes.
+     * @param ui The user interface used to display results.
+     * @return Whether Min should continue running.
+     * @throws MinException If the command input is invalid.
+     * @throws IOException If the task list cannot be saved.
+     */
     private static boolean executeCommand(String input, Parser parser, TaskList tasks,
             Storage storage, Ui ui) throws MinException, IOException {
         Command command = parser.parseCommand(input);

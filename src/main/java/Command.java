@@ -1,4 +1,4 @@
-// Represents a command recognized by Min.
+/** Represents a command recognized by Min. */
 public enum Command {
     BYE("bye", false),
     LIST("list", false),
@@ -17,11 +17,17 @@ public enum Command {
         this.acceptsArguments = acceptsArguments;
     }
 
+    /** Returns the word used to enter this command. */
     public String getWord() {
         return this.word;
     }
 
-    // Checks whether the input has this command's valid command word.
+    /**
+     * Checks whether the input begins with this command's valid command word.
+     *
+     * @param input The command entered by the user.
+     * @return Whether the input matches this command.
+     */
     public boolean matches(String input) {
         if (!this.acceptsArguments) {
             return input.equals(this.word);

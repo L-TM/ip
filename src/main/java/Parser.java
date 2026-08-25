@@ -2,7 +2,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-// Parses and validates commands entered by the user.
+/** Parses and validates commands entered by the user. */
 public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
@@ -19,7 +19,13 @@ public class Parser {
     private static final String INVALID_COMMAND_MESSAGE =
             "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
 
-    // Identifies the command represented by the input.
+    /**
+     * Identifies the command represented by the input.
+     *
+     * @param input The command entered by the user.
+     * @return The identified command.
+     * @throws MinException If the input does not begin with a valid command word.
+     */
     public Command parseCommand(String input) throws MinException {
         for (Command command : Command.values()) {
             if (command.matches(input)) {
@@ -29,7 +35,15 @@ public class Parser {
         throw new MinException(INVALID_COMMAND_MESSAGE);
     }
 
-    // Parses a valid task number into a zero-based task index.
+    /**
+     * Parses a valid task number into a zero-based task index.
+     *
+     * @param input The command entered by the user.
+     * @param command The command that requires a task number.
+     * @param taskCount The number of tasks currently in the list.
+     * @return The zero-based index of the requested task.
+     * @throws MinException If the task number is missing, malformed, or outside the task list.
+     */
     public int parseTaskIndex(String input, Command command, int taskCount)
             throws MinException {
         String taskNumberText = getDetails(input, command);
@@ -51,7 +65,13 @@ public class Parser {
         }
     }
 
-    // Creates a todo task from the input.
+    /**
+     * Creates a todo task from the input.
+     *
+     * @param input The command entered by the user.
+     * @return The created todo task.
+     * @throws MinException If the todo description is missing.
+     */
     public Todo parseTodo(String input) throws MinException {
         String description = getDetails(input, Command.TODO);
         if (description.isEmpty()) {
@@ -60,7 +80,13 @@ public class Parser {
         return new Todo(description);
     }
 
-    // Creates a deadline task from the input.
+    /**
+     * Creates a deadline task from the input.
+     *
+     * @param input The command entered by the user.
+     * @return The created deadline task.
+     * @throws MinException If the deadline details or date are invalid.
+     */
     public Deadline parseDeadline(String input) throws MinException {
         String deadlineDetails = getDetails(input, Command.DEADLINE);
         int byIndex = deadlineDetails.indexOf(BY_SEPARATOR);
@@ -76,7 +102,13 @@ public class Parser {
         return new Deadline(description, parseDeadlineDate(byText));
     }
 
-    // Creates an event task from the input.
+    /**
+     * Creates an event task from the input.
+     *
+     * @param input The command entered by the user.
+     * @return The created event task.
+     * @throws MinException If the event details are invalid.
+     */
     public Event parseEvent(String input) throws MinException {
         String eventDetails = getDetails(input, Command.EVENT);
         int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
@@ -104,7 +136,13 @@ public class Parser {
         return input.substring(command.getWord().length()).trim();
     }
 
-    // Parses a deadline date in the required ISO format.
+    /**
+     * Parses a deadline date in the required ISO format.
+     *
+     * @param dateText The date text to parse.
+     * @return The parsed deadline date.
+     * @throws MinException If the date text is not a valid ISO date.
+     */
     private LocalDate parseDeadlineDate(String dateText) throws MinException {
         try {
             return LocalDate.parse(dateText, DateTimeFormatter.ISO_LOCAL_DATE);
