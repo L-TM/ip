@@ -21,6 +21,22 @@ public class TaskList {
     }
 
     /**
+     * Returns tasks whose descriptions contain the given keyword.
+     *
+     * @param keyword The text to match against task descriptions.
+     * @return A read-only list of matching tasks.
+     */
+    public List<Task> findTasks(String keyword) {
+        List<Task> matchingTasks = new ArrayList<>();
+        for (Task task : this.tasks) {
+            if (task.getDescription().contains(keyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return List.copyOf(matchingTasks);
+    }
+
+    /**
      * Marks the task at the given index as complete.
      *
      * @param index The zero-based index of the task to mark.

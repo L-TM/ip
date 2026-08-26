@@ -108,6 +108,9 @@ public class Min {
             case LIST:
                 ui.showTaskList(tasks.getTasks());
                 break;
+            case FIND:
+                ui.showMatchingTasks(tasks.findTasks(parser.parseFindKeyword(input)));
+                break;
             case MARK:
                 Task markedTask = tasks.markTask(parser.parseTaskIndex(input, command, tasks.size()));
                 storage.save(tasks.getTasks());

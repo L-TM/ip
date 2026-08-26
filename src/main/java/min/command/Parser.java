@@ -4,13 +4,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-/** Parses and validates commands entered by the user. */
 import min.exception.MinException;
 import min.task.Deadline;
 import min.task.Event;
 import min.task.Todo;
 
-// Parses and validates commands entered by the user.
+/** Parses and validates commands entered by the user. */
 public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
@@ -24,8 +23,10 @@ public class Parser {
             "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
     private static final String INVALID_DEADLINE_DATE_MESSAGE =
             "Invalid deadline date. Use yyyy-mm-dd.";
+    private static final String INVALID_FIND_MESSAGE =
+            "Please provide a keyword to find.";
     private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
+            "Invalid command. Use bye, list, find, mark, unmark, delete, todo, deadline, or event.";
 
     /**
      * Identifies the command represented by the input.
@@ -86,6 +87,21 @@ public class Parser {
             throw new MinException(INVALID_TODO_MESSAGE);
         }
         return new Todo(description);
+    }
+
+    /**
+     * Parses the keyword used to find tasks.
+     *
+     * @param input The command entered by the user.
+     * @return The keyword used to match task descriptions.
+     * @throws MinException If no find keyword is provided.
+     */
+    public String parseFindKeyword(String input) throws MinException {
+        String keyword = getDetails(input, Command.FIND);
+        if (keyword.isEmpty()) {
+            throw new MinException(INVALID_FIND_MESSAGE);
+        }
+        return keyword;
     }
 
     /**

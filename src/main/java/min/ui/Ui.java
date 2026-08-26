@@ -5,7 +5,6 @@ import java.util.Scanner;
 
 import min.task.Task;
 
-// Handles Min's console input and output.
 /** Handles Min's console input and output. */
 public class Ui {
     private static final int SEPARATOR_LENGTH = 60;
@@ -59,6 +58,19 @@ public class Ui {
      */
     public void showTaskList(List<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
+        }
+        showLine();
+    }
+
+    /**
+     * Prints the tasks matching a search keyword.
+     *
+     * @param tasks The matching tasks to display.
+     */
+    public void showMatchingTasks(List<Task> tasks) {
+        System.out.println("Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println(" " + (i + 1) + "." + tasks.get(i));
         }
