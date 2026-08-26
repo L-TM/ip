@@ -16,8 +16,10 @@ public class Parser {
             "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
     private static final String INVALID_DEADLINE_DATE_MESSAGE =
             "Invalid deadline date. Use yyyy-mm-dd.";
+    private static final String INVALID_FIND_MESSAGE =
+            "Please provide a keyword to find.";
     private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, mark, unmark, delete, todo, deadline, or event.";
+            "Invalid command. Use bye, list, find, mark, unmark, delete, todo, deadline, or event.";
 
     // Identifies the command represented by the input.
     public Command parseCommand(String input) throws MinException {
@@ -58,6 +60,15 @@ public class Parser {
             throw new MinException(INVALID_TODO_MESSAGE);
         }
         return new Todo(description);
+    }
+
+    // Parses the keyword used to find tasks.
+    public String parseFindKeyword(String input) throws MinException {
+        String keyword = getDetails(input, Command.FIND);
+        if (keyword.isEmpty()) {
+            throw new MinException(INVALID_FIND_MESSAGE);
+        }
+        return keyword;
     }
 
     // Creates a deadline task from the input.

@@ -14,6 +14,17 @@ public class TaskList {
         this.tasks.add(task);
     }
 
+    // Returns tasks whose descriptions contain the given keyword.
+    public List<Task> findTasks(String keyword) {
+        List<Task> matchingTasks = new ArrayList<>();
+        for (Task task : this.tasks) {
+            if (task.getDescription().contains(keyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return List.copyOf(matchingTasks);
+    }
+
     // Marks the task at the given index as done.
     public Task markTask(int index) {
         Task task = this.tasks.get(index);

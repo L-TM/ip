@@ -56,6 +56,15 @@ public class Ui {
         showLine();
     }
 
+    // Prints the tasks matching a search keyword.
+    public void showMatchingTasks(List<Task> tasks) {
+        System.out.println("Here are the matching tasks in your list:");
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(" " + (i + 1) + "." + tasks.get(i));
+        }
+        showLine();
+    }
+
     // Prints a confirmation after marking a task as done.
     public void showTaskMarked(Task task) {
         System.out.println("Nice! I've marked this task as done:");
