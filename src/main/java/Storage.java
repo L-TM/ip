@@ -6,11 +6,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-// Saves and loads Min tasks on the hard disk.
+/** Saves and loads Min tasks on the hard disk. */
 public class Storage {
     private static final Path FILE_PATH = Path.of("data", "min.txt");
 
-    // Rewrites the data file with the current task list.
+    /**
+     * Rewrites the data file with the current task list.
+     *
+     * @param tasks The tasks to save.
+     * @throws IOException If the data file cannot be written.
+     */
     public void save(List<Task> tasks) throws IOException {
         Files.createDirectories(FILE_PATH.getParent());
 
@@ -22,7 +27,13 @@ public class Storage {
         }
     }
 
-    // Loads all saved tasks from the data file.
+    /**
+     * Loads all saved tasks from the data file.
+     *
+     * @return The loaded tasks, or an empty list when no data file exists.
+     * @throws IOException If the data file cannot be read.
+     * @throws java.time.format.DateTimeParseException If a saved deadline date is invalid.
+     */
     public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
         if (!Files.exists(FILE_PATH)) {
@@ -35,7 +46,13 @@ public class Storage {
         return tasks;
     }
 
-    // Recreates a task from one line of saved data.
+    /**
+     * Recreates a task from one line of saved data.
+     *
+     * @param line A line read from the data file.
+     * @return The recreated task.
+     * @throws IllegalArgumentException If the line has an unknown task type.
+     */
     private Task createTask(String line) {
         String[] fields = line.split(" \\| ", -1);
         Task task = switch (fields[0]) {

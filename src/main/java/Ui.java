@@ -1,7 +1,7 @@
 import java.util.List;
 import java.util.Scanner;
 
-// Handles Min's console input and output.
+/** Handles Min's console input and output. */
 public class Ui {
     private static final int SEPARATOR_LENGTH = 60;
     private static final String SEPARATOR = "_".repeat(SEPARATOR_LENGTH);
@@ -12,17 +12,17 @@ public class Ui {
         this.scanner = new Scanner(System.in);
     }
 
-    // Checks whether another command is available from the user.
+    /** Returns whether another command is available from the user. */
     public boolean hasNextCommand() {
         return this.scanner.hasNextLine();
     }
 
-    // Reads and trims the next command from the user.
+    /** Returns the next command entered by the user with leading and trailing whitespace removed. */
     public String readCommand() {
         return this.scanner.nextLine().trim();
     }
 
-    // Prints the welcome message.
+    /** Prints Min's welcome message. */
     public void showWelcome() {
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
@@ -36,18 +36,22 @@ public class Ui {
         showLine();
     }
 
-    // Prints Min's standard separator.
+    /** Prints Min's standard separator. */
     public void showLine() {
         System.out.println(SEPARATOR);
     }
 
-    // Prints the goodbye message.
+    /** Prints Min's goodbye message. */
     public void showGoodbye() {
         System.out.println(" Bye. Hope to see you again soon!");
         showLine();
     }
 
-    // Prints the current task list.
+    /**
+     * Prints the current task list.
+     *
+     * @param tasks The tasks to display.
+     */
     public void showTaskList(List<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
@@ -56,21 +60,34 @@ public class Ui {
         showLine();
     }
 
-    // Prints a confirmation after marking a task as done.
+    /**
+     * Prints a confirmation after marking a task as complete.
+     *
+     * @param task The task that was marked.
+     */
     public void showTaskMarked(Task task) {
         System.out.println("Nice! I've marked this task as done:");
         System.out.println("   " + task);
         showLine();
     }
 
-    // Prints a confirmation after marking a task as not done.
+    /**
+     * Prints a confirmation after marking a task as incomplete.
+     *
+     * @param task The task that was unmarked.
+     */
     public void showTaskUnmarked(Task task) {
         System.out.println("OK, I've marked this task as not done yet:");
         System.out.println("   " + task);
         showLine();
     }
 
-    // Prints a confirmation after adding a task.
+    /**
+     * Prints a confirmation after adding a task.
+     *
+     * @param task The added task.
+     * @param taskCount The number of tasks currently in the list.
+     */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println(" Got it. I've added this task:");
         System.out.println("   " + task);
@@ -78,7 +95,12 @@ public class Ui {
         showLine();
     }
 
-    // Prints a confirmation after deleting a task.
+    /**
+     * Prints a confirmation after deleting a task.
+     *
+     * @param task The deleted task.
+     * @param taskCount The number of tasks remaining in the list.
+     */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println(" Got it. I've removed this task:");
         System.out.println("   " + task);
@@ -86,7 +108,11 @@ public class Ui {
         showLine();
     }
 
-    // Prints an error message.
+    /**
+     * Prints an error message.
+     *
+     * @param message The message to display.
+     */
     public void showError(String message) {
         System.out.println(" " + message);
         showLine();
