@@ -1,8 +1,16 @@
+package min.command;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /** Parses and validates commands entered by the user. */
+import min.exception.MinException;
+import min.task.Deadline;
+import min.task.Event;
+import min.task.Todo;
+
+// Parses and validates commands entered by the user.
 public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";

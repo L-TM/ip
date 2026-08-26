@@ -1,6 +1,11 @@
+package min.ui;
+
 import java.util.List;
 import java.util.Scanner;
 
+import min.task.Task;
+
+// Handles Min's console input and output.
 /** Handles Min's console input and output. */
 public class Ui {
     private static final int SEPARATOR_LENGTH = 60;

@@ -1,3 +1,5 @@
+package min.storage;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -5,6 +7,11 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import min.task.Deadline;
+import min.task.Event;
+import min.task.Task;
+import min.task.Todo;
 
 /** Saves and loads Min tasks on the hard disk. */
 public class Storage {
@@ -56,10 +63,10 @@ public class Storage {
     private Task createTask(String line) {
         String[] fields = line.split(" \\| ", -1);
         Task task = switch (fields[0]) {
-        case "T" -> new Todo(fields[2]);
-        case "D" -> new Deadline(fields[2], LocalDate.parse(fields[3]));
-        case "E" -> new Event(fields[2], fields[3], fields[4]);
-        default -> throw new IllegalArgumentException("Unknown task type.");
+            case "T" -> new Todo(fields[2]);
+            case "D" -> new Deadline(fields[2], LocalDate.parse(fields[3]));
+            case "E" -> new Event(fields[2], fields[3], fields[4]);
+            default -> throw new IllegalArgumentException("Unknown task type.");
         };
 
         if (fields[1].equals("1")) {
