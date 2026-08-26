@@ -1,3 +1,5 @@
+package min.command;
+
 // Represents a command recognized by Min.
 public enum Command {
     BYE("bye", false),

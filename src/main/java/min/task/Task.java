@@ -1,3 +1,5 @@
+package min.task;
+
 public abstract class Task {
     protected static final String FILE_FIELD_SEPARATOR = " | ";
 

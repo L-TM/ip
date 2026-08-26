@@ -1,3 +1,5 @@
+package min.storage;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -5,6 +7,11 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import min.task.Deadline;
+import min.task.Event;
+import min.task.Task;
+import min.task.Todo;
 
 // Saves and loads Min tasks on the hard disk.
 public class Storage {

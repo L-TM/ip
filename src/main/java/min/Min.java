@@ -1,5 +1,15 @@
+package min;
+
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
+
+import min.command.Command;
+import min.command.Parser;
+import min.exception.MinException;
+import min.storage.Storage;
+import min.task.Task;
+import min.task.TaskList;
+import min.ui.Ui;
 
 /** Runs the Min chatbot. */
 public class Min {
