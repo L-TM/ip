@@ -72,38 +72,38 @@ public class Min {
             Storage storage, Ui ui) throws MinException, IOException {
         Command command = parser.parseCommand(input);
         switch (command) {
-        case BYE:
-            ui.showGoodbye();
-            return false;
-        case LIST:
-            ui.showTaskList(tasks.getTasks());
-            break;
-        case MARK:
-            Task markedTask = tasks.markTask(parser.parseTaskIndex(input, command, tasks.size()));
-            storage.save(tasks.getTasks());
-            ui.showTaskMarked(markedTask);
-            break;
-        case UNMARK:
-            Task unmarkedTask = tasks.unmarkTask(
-                    parser.parseTaskIndex(input, command, tasks.size()));
-            storage.save(tasks.getTasks());
-            ui.showTaskUnmarked(unmarkedTask);
-            break;
-        case DELETE:
-            int taskIndex = parser.parseTaskIndex(input, command, tasks.size());
-            Task deletedTask = tasks.deleteTask(taskIndex);
-            storage.save(tasks.getTasks());
-            ui.showTaskDeleted(deletedTask, tasks.size());
-            break;
-        case TODO:
-            addTask(tasks, parser.parseTodo(input), storage, ui);
-            break;
-        case DEADLINE:
-            addTask(tasks, parser.parseDeadline(input), storage, ui);
-            break;
-        case EVENT:
-            addTask(tasks, parser.parseEvent(input), storage, ui);
-            break;
+            case BYE:
+                ui.showGoodbye();
+                return false;
+            case LIST:
+                ui.showTaskList(tasks.getTasks());
+                break;
+            case MARK:
+                Task markedTask = tasks.markTask(parser.parseTaskIndex(input, command, tasks.size()));
+                storage.save(tasks.getTasks());
+                ui.showTaskMarked(markedTask);
+                break;
+            case UNMARK:
+                Task unmarkedTask = tasks.unmarkTask(
+                        parser.parseTaskIndex(input, command, tasks.size()));
+                storage.save(tasks.getTasks());
+                ui.showTaskUnmarked(unmarkedTask);
+                break;
+            case DELETE:
+                int taskIndex = parser.parseTaskIndex(input, command, tasks.size());
+                Task deletedTask = tasks.deleteTask(taskIndex);
+                storage.save(tasks.getTasks());
+                ui.showTaskDeleted(deletedTask, tasks.size());
+                break;
+            case TODO:
+                addTask(tasks, parser.parseTodo(input), storage, ui);
+                break;
+            case DEADLINE:
+                addTask(tasks, parser.parseDeadline(input), storage, ui);
+                break;
+            case EVENT:
+                addTask(tasks, parser.parseEvent(input), storage, ui);
+                break;
         }
         return true;
     }
