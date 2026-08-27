@@ -15,7 +15,18 @@ import min.task.Todo;
 
 /** Saves and loads Min tasks on the hard disk. */
 public class Storage {
-    private static final Path FILE_PATH = Path.of("data", "min.txt");
+    private static final Path DEFAULT_FILE_PATH = Path.of("data", "min.txt");
+
+    private final Path filePath;
+
+    /** Creates storage that uses Min's default data file. */
+    public Storage() {
+        this(DEFAULT_FILE_PATH);
+    }
+
+    Storage(Path filePath) {
+        this.filePath = filePath;
+    }
 
     /**
      * Rewrites the data file with the current task list.
@@ -24,9 +35,9 @@ public class Storage {
      * @throws IOException If the data file cannot be written.
      */
     public void save(List<Task> tasks) throws IOException {
-        Files.createDirectories(FILE_PATH.getParent());
+        Files.createDirectories(filePath.getParent());
 
-        try (BufferedWriter writer = Files.newBufferedWriter(FILE_PATH)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
             for (Task task : tasks) {
                 writer.write(task.toFileString());
                 writer.newLine();
@@ -43,11 +54,11 @@ public class Storage {
      */
     public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
-        if (!Files.exists(FILE_PATH)) {
+        if (!Files.exists(filePath)) {
             return tasks;
         }
 
-        for (String line : Files.readAllLines(FILE_PATH)) {
+        for (String line : Files.readAllLines(filePath)) {
             tasks.add(createTask(line));
         }
         return tasks;
