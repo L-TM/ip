@@ -98,7 +98,7 @@ public class Min {
      * @throws MinException If the command input is invalid.
      * @throws IOException If the task list cannot be saved.
      */
-    private static boolean executeCommand(String input, Parser parser, TaskList tasks,
+    static boolean executeCommand(String input, Parser parser, TaskList tasks,
             Storage storage, Ui ui) throws MinException, IOException {
         Command command = parser.parseCommand(input);
         switch (command) {
@@ -106,24 +106,26 @@ public class Min {
                 ui.showGoodbye();
                 return false;
             case LIST:
-                ui.showTaskList(tasks.getTasks());
+                ui.showTaskList(tasks.showAllTasks());
                 break;
             case FIND:
                 ui.showMatchingTasks(tasks.findTasks(parser.parseFindKeyword(input)));
                 break;
             case MARK:
-                Task markedTask = tasks.markTask(parser.parseTaskIndex(input, command, tasks.size()));
+                Task markedTask = tasks.markTask(parser.parseTaskIndex(
+                        input, command, tasks.getDisplayedTaskCount()));
                 storage.save(tasks.getTasks());
                 ui.showTaskMarked(markedTask);
                 break;
             case UNMARK:
                 Task unmarkedTask = tasks.unmarkTask(
-                        parser.parseTaskIndex(input, command, tasks.size()));
+                        parser.parseTaskIndex(input, command, tasks.getDisplayedTaskCount()));
                 storage.save(tasks.getTasks());
                 ui.showTaskUnmarked(unmarkedTask);
                 break;
             case DELETE:
-                int taskIndex = parser.parseTaskIndex(input, command, tasks.size());
+                int taskIndex = parser.parseTaskIndex(
+                        input, command, tasks.getDisplayedTaskCount());
                 Task deletedTask = tasks.deleteTask(taskIndex);
                 storage.save(tasks.getTasks());
                 ui.showTaskDeleted(deletedTask, tasks.size());

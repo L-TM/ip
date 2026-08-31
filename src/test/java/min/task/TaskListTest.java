@@ -34,6 +34,7 @@ class TaskListTest {
         taskList.addTask(secondTask);
 
         assertEquals(2, taskList.size());
+        assertEquals(2, taskList.getDisplayedTaskCount());
         assertEquals(List.of(firstTask, secondTask), taskList.getTasks());
     }
 
@@ -100,6 +101,101 @@ class TaskListTest {
         List<Task> matchingTasks = taskList.findTasks("exercise");
 
         assertTrue(matchingTasks.isEmpty());
+    }
+
+    @Test
+    void markTask_activeFindView_marksSecondMatchingTask() {
+        Todo firstMatch = new Todo("read book");
+        Todo nonMatch = new Todo("buy milk");
+        Todo secondMatch = new Todo("reread notes");
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        taskList.findTasks("read");
+
+        Task markedTask = taskList.markTask(1);
+
+        assertSame(secondMatch, markedTask);
+        assertFalse(nonMatch.isDone());
+        assertTrue(secondMatch.isDone());
+    }
+
+    @Test
+    void unmarkTask_activeFindView_unmarksSecondMatchingTask() {
+        Todo firstMatch = new Todo("read book");
+        Todo nonMatch = new Todo("buy milk");
+        Todo secondMatch = new Todo("reread notes");
+        nonMatch.markAsDone();
+        secondMatch.markAsDone();
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        taskList.findTasks("read");
+
+        Task unmarkedTask = taskList.unmarkTask(1);
+
+        assertSame(secondMatch, unmarkedTask);
+        assertTrue(nonMatch.isDone());
+        assertFalse(secondMatch.isDone());
+    }
+
+    @Test
+    void deleteTask_activeFindView_deletesSecondMatchingTask() {
+        Todo firstMatch = new Todo("read book");
+        Todo nonMatch = new Todo("buy milk");
+        Todo secondMatch = new Todo("reread notes");
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        taskList.findTasks("read");
+
+        Task deletedTask = taskList.deleteTask(1);
+
+        assertSame(secondMatch, deletedTask);
+        assertEquals(List.of(firstMatch, nonMatch), taskList.getTasks());
+        assertEquals(1, taskList.getDisplayedTaskCount());
+    }
+
+    @Test
+    void showAllTasks_activeFindView_restoresFullListNumbering() {
+        Todo firstMatch = new Todo("read book");
+        Todo nonMatch = new Todo("buy milk");
+        Todo secondMatch = new Todo("reread notes");
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        taskList.findTasks("read");
+
+        List<Task> displayedTasks = taskList.showAllTasks();
+        Task markedTask = taskList.markTask(1);
+
+        assertEquals(List.of(firstMatch, nonMatch, secondMatch), displayedTasks);
+        assertSame(nonMatch, markedTask);
+    }
+
+    @Test
+    void findTasks_secondSearch_replacesDisplayedView() {
+        Todo firstMatch = new Todo("read book");
+        Todo secondMatch = new Todo("buy milk");
+        Todo thirdMatch = new Todo("reread notes");
+        TaskList taskList = new TaskList(List.of(firstMatch, secondMatch, thirdMatch));
+        taskList.findTasks("read");
+
+        List<Task> matchingTasks = taskList.findTasks("milk");
+        Task markedTask = taskList.markTask(0);
+
+        assertEquals(List.of(secondMatch), matchingTasks);
+        assertSame(secondMatch, markedTask);
+    }
+
+    @Test
+    void addTask_activeFindView_preservesDisplayedSnapshot() {
+        Todo firstMatch = new Todo("read book");
+        Todo nonMatch = new Todo("buy milk");
+        Todo secondMatch = new Todo("reread notes");
+        Todo addedMatch = new Todo("read article");
+        TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
+        taskList.findTasks("read");
+
+        taskList.addTask(addedMatch);
+        Task markedTask = taskList.markTask(1);
+
+        assertEquals(4, taskList.size());
+        assertEquals(2, taskList.getDisplayedTaskCount());
+        assertSame(secondMatch, markedTask);
+        assertFalse(addedMatch.isDone());
     }
 
     @Test
