@@ -2,6 +2,7 @@ package min;
 
 import java.io.IOException;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 import min.command.Command;
 import min.command.Parser;
@@ -9,49 +10,41 @@ import min.exception.MinException;
 import min.storage.Storage;
 import min.task.Task;
 import min.task.TaskList;
-import min.ui.Ui;
 
-/** Runs the Min chatbot. */
+/** Processes commands and manages Min's task data. */
 public class Min {
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
+    private static final String WELCOME_MESSAGE =
+            "Hello! I'm Min.\nWhat can I do for you?";
+
+    private final Parser parser;
+    private final Storage storage;
+    private final TaskList tasks;
 
     /**
-     * Runs the chatbot and handles user commands.
+     * Creates Min and loads its saved tasks.
      *
-     * @param args Command-line arguments, which Min does not use.
+     * @throws IOException If the saved tasks cannot be read.
+     * @throws MinException If the saved task data is invalid.
      */
-    public static void main(String[] args) {
-        Ui ui = new Ui();
-        Parser parser = new Parser();
-        Storage storage = new Storage();
-        TaskList tasks;
-        try {
-            tasks = loadTasks(storage);
-        } catch (MinException e) {
-            ui.showError(e.getMessage());
-            return;
-        } catch (IOException e) {
-            ui.showError("Unable to load tasks.");
-            return;
-        }
+    public Min() throws IOException, MinException {
+        this.parser = new Parser();
+        this.storage = new Storage();
+        this.tasks = loadTasks(this.storage);
+    }
 
-        ui.showWelcome();
-
-        while (ui.hasNextCommand()) {
-            String command = ui.readCommand();
-            ui.showLine();
-
-            try {
-                if (!executeCommand(command, parser, tasks, storage, ui)) {
-                    break;
-                }
-            } catch (MinException e) {
-                ui.showError(e.getMessage());
-            } catch (IOException e) {
-                ui.showError("Unable to save tasks.");
-            }
-        }
+    /**
+     * Creates Min using the supplied dependencies.
+     *
+     * @param parser The parser used to interpret commands.
+     * @param tasks The task list managed by Min.
+     * @param storage The storage used to save task data.
+     */
+    Min(Parser parser, TaskList tasks, Storage storage) {
+        this.parser = parser;
+        this.tasks = tasks;
+        this.storage = storage;
     }
 
     /**
@@ -71,75 +64,113 @@ public class Min {
     }
 
     /**
-     * Adds a task, saves the updated list, and displays its confirmation.
+     * Adds a task, saves the updated list, and returns its confirmation.
      *
-     * @param tasks The task list to update.
      * @param task The task to add.
-     * @param storage The storage used to save the task list.
-     * @param ui The user interface used to show the confirmation.
+     * @return The confirmation message.
      * @throws IOException If the task list cannot be saved.
      */
-    private static void addTask(TaskList tasks, Task task, Storage storage, Ui ui)
-            throws IOException {
-        tasks.addTask(task);
-        storage.save(tasks.getTasks());
-        ui.showTaskAdded(task, tasks.size());
+    private String addTask(Task task) throws IOException {
+        this.tasks.addTask(task);
+        this.storage.save(this.tasks.getTasks());
+
+        return " Got it. I've added this task:\n"
+                + "   " + task + "\n"
+                + " Now you have " + this.tasks.size() + " tasks in the list.";
+    }
+
+    /** Returns Min's welcome message. */
+    public String getWelcomeMessage() {
+        return WELCOME_MESSAGE;
     }
 
     /**
-     * Executes one command and reports whether Min should continue running.
+     * Processes user input and returns a response suitable for any user interface.
      *
      * @param input The command entered by the user.
-     * @param parser The parser used to interpret the command.
-     * @param tasks The task list to update or display.
-     * @param storage The storage used to save task changes.
-     * @param ui The user interface used to display results.
-     * @return Whether Min should continue running.
+     * @return Min's response.
+     */
+    public String getResponse(String input) {
+        try {
+            return executeCommand(input.trim());
+        } catch (MinException e) {
+            return e.getMessage();
+        } catch (IOException e) {
+            return "Unable to save tasks.";
+        }
+    }
+
+    /**
+     * Formats tasks as a numbered list.
+     *
+     * @param heading The heading shown before the tasks.
+     * @param displayedTasks The tasks to include.
+     * @return The formatted task list.
+     */
+    private String formatTaskList(String heading, List<Task> displayedTasks) {
+        StringBuilder response = new StringBuilder(heading);
+
+        for (int i = 0; i < displayedTasks.size(); i++) {
+            response.append("\n ")
+                    .append(i + 1)
+                    .append(".")
+                    .append(displayedTasks.get(i));
+        }
+
+        return response.toString();
+    }
+
+    /**
+     * Executes one command and returns Min's response.
+     *
+     * @param input The command entered by the user.
+     * @return Min's response.
      * @throws MinException If the command input is invalid.
      * @throws IOException If the task list cannot be saved.
      */
-    static boolean executeCommand(String input, Parser parser, TaskList tasks,
-            Storage storage, Ui ui) throws MinException, IOException {
-        Command command = parser.parseCommand(input);
+    private String executeCommand(String input) throws MinException, IOException {
+        Command command = this.parser.parseCommand(input);
+
         switch (command) {
             case BYE:
-                ui.showGoodbye();
-                return false;
+                return " Bye. Hope to see you again soon!";
             case LIST:
-                ui.showTaskList(tasks.showAllTasks());
-                break;
+                return formatTaskList(
+                        "Here are the tasks in your list:",
+                        this.tasks.showAllTasks());
             case FIND:
-                ui.showMatchingTasks(tasks.findTasks(parser.parseFindKeyword(input)));
-                break;
+                return formatTaskList(
+                        "Here are the matching tasks in your list:",
+                        this.tasks.findTasks(this.parser.parseFindKeyword(input)));
             case MARK:
-                Task markedTask = tasks.markTask(parser.parseTaskIndex(
-                        input, command, tasks.getDisplayedTaskCount()));
-                storage.save(tasks.getTasks());
-                ui.showTaskMarked(markedTask);
-                break;
+                Task markedTask = this.tasks.markTask(this.parser.parseTaskIndex(
+                        input, command, this.tasks.getDisplayedTaskCount()));
+                this.storage.save(this.tasks.getTasks());
+                return "Nice! I've marked this task as done:\n"
+                        + "   " + markedTask;
             case UNMARK:
-                Task unmarkedTask = tasks.unmarkTask(
-                        parser.parseTaskIndex(input, command, tasks.getDisplayedTaskCount()));
-                storage.save(tasks.getTasks());
-                ui.showTaskUnmarked(unmarkedTask);
-                break;
+                Task unmarkedTask = this.tasks.unmarkTask(
+                        this.parser.parseTaskIndex(
+                                input, command, this.tasks.getDisplayedTaskCount()));
+                this.storage.save(this.tasks.getTasks());
+                return "OK, I've marked this task as not done yet:\n"
+                        + "   " + unmarkedTask;
             case DELETE:
-                int taskIndex = parser.parseTaskIndex(
-                        input, command, tasks.getDisplayedTaskCount());
-                Task deletedTask = tasks.deleteTask(taskIndex);
-                storage.save(tasks.getTasks());
-                ui.showTaskDeleted(deletedTask, tasks.size());
-                break;
+                int taskIndex = this.parser.parseTaskIndex(
+                        input, command, this.tasks.getDisplayedTaskCount());
+                Task deletedTask = this.tasks.deleteTask(taskIndex);
+                this.storage.save(this.tasks.getTasks());
+                return " Got it. I've removed this task:\n"
+                        + "   " + deletedTask + "\n"
+                        + " Now you have " + this.tasks.size() + " tasks in the list.";
             case TODO:
-                addTask(tasks, parser.parseTodo(input), storage, ui);
-                break;
+                return addTask(this.parser.parseTodo(input));
             case DEADLINE:
-                addTask(tasks, parser.parseDeadline(input), storage, ui);
-                break;
+                return addTask(this.parser.parseDeadline(input));
             case EVENT:
-                addTask(tasks, parser.parseEvent(input), storage, ui);
-                break;
+                return addTask(this.parser.parseEvent(input));
         }
-        return true;
+
+        throw new IllegalStateException("Unhandled command: " + command);
     }
 }
