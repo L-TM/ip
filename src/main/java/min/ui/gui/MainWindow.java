@@ -1,5 +1,7 @@
 package min.ui.gui;
 
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -7,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import min.Min;
 
@@ -14,6 +17,8 @@ import min.Min;
  * Controller for the main GUI.
  */
 public class MainWindow extends AnchorPane {
+    private static final Duration EXIT_DELAY = Duration.seconds(1);
+
     @FXML
     private ScrollPane scrollPane;
     @FXML
@@ -65,5 +70,19 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getMinDialog(response, this.minImage)
         );
         this.userInput.clear();
+
+        if (this.min.isExitCommand(input)) {
+            exitAfterDelay();
+        }
+    }
+
+    /** Disables further input and closes the application after a short delay. */
+    private void exitAfterDelay() {
+        this.userInput.setDisable(true);
+        this.sendButton.setDisable(true);
+
+        PauseTransition pause = new PauseTransition(EXIT_DELAY);
+        pause.setOnFinished(event -> Platform.exit());
+        pause.play();
     }
 }

@@ -85,6 +85,16 @@ public class Min {
     }
 
     /**
+     * Returns whether the input requests that Min exit.
+     *
+     * @param input The command entered by the user.
+     * @return Whether the input is the exit command.
+     */
+    public boolean isExitCommand(String input) {
+        return Command.BYE.matches(input.trim());
+    }
+
+    /**
      * Processes user input and returns a response suitable for any user interface.
      *
      * @param input The command entered by the user.

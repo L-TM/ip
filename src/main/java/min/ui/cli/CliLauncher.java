@@ -36,7 +36,7 @@ public class CliLauncher {
             String response = min.getResponse(command);
             ui.showResponse(response);
 
-            if (command.equals("bye")) {
+            if (min.isExitCommand(command)) {
                 break;
             }
         }

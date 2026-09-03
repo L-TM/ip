@@ -19,6 +19,29 @@ class MinTest {
     private final Storage storage = new NoOpStorage();
 
     @Test
+    void isExitCommand_byeWithSurroundingWhitespace_returnsTrue() {
+        Min min = new Min(parser, new TaskList(List.of()), storage);
+
+        assertTrue(min.isExitCommand("  bye  "));
+    }
+
+    @Test
+    void isExitCommand_nonByeInputs_returnsFalse() {
+        Min min = new Min(parser, new TaskList(List.of()), storage);
+
+        assertFalse(min.isExitCommand("byebye"));
+        assertFalse(min.isExitCommand("list"));
+        assertFalse(min.isExitCommand("dance"));
+    }
+
+    @Test
+    void getResponse_bye_returnsGoodbyeMessage() {
+        Min min = new Min(parser, new TaskList(List.of()), storage);
+
+        assertEquals(" Bye. Hope to see you again soon!", min.getResponse("bye"));
+    }
+
+    @Test
     void getResponse_findThenMark_marksSecondDisplayedMatch() {
         Todo firstMatch = new Todo("read book");
         Todo nonMatch = new Todo("buy milk");
