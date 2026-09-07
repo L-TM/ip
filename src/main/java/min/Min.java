@@ -140,7 +140,7 @@ public class Min {
     private String findTasks(String input) throws MinException {
         return formatTaskList(
                 "Here are the matching tasks in your list:",
-                this.tasks.findTasks(this.parser.parseFindKeyword(input)));
+                this.tasks.showMatchingTasks(this.parser.parseFindKeyword(input)));
     }
 
     /**

@@ -80,7 +80,7 @@ class TaskListTest {
     }
 
     @Test
-    void findTasks_matchingKeyword_returnsMatchesInOriginalOrder() {
+    void showMatchingTasks_matchingKeyword_returnsMatchesInOriginalOrder() {
         Todo firstMatch = new Todo("read book");
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
@@ -88,17 +88,17 @@ class TaskListTest {
         TaskList taskList = new TaskList(
                 List.of(firstMatch, nonMatch, secondMatch, caseDifferentTask));
 
-        List<Task> matchingTasks = taskList.findTasks("read");
+        List<Task> matchingTasks = taskList.showMatchingTasks("read");
 
         assertEquals(List.of(firstMatch, secondMatch), matchingTasks);
     }
 
     @Test
-    void findTasks_noMatchingKeyword_returnsEmptyList() {
+    void showMatchingTasks_noMatchingKeyword_returnsEmptyList() {
         TaskList taskList = new TaskList(
                 List.of(new Todo("read book"), new Todo("buy milk")));
 
-        List<Task> matchingTasks = taskList.findTasks("exercise");
+        List<Task> matchingTasks = taskList.showMatchingTasks("exercise");
 
         assertTrue(matchingTasks.isEmpty());
     }
@@ -109,7 +109,7 @@ class TaskListTest {
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
         Task markedTask = taskList.markTask(1);
 
@@ -126,7 +126,7 @@ class TaskListTest {
         nonMatch.markAsDone();
         secondMatch.markAsDone();
         TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
         Task unmarkedTask = taskList.unmarkTask(1);
 
@@ -141,7 +141,7 @@ class TaskListTest {
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
         Task deletedTask = taskList.deleteTask(1);
 
@@ -156,7 +156,7 @@ class TaskListTest {
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
         List<Task> displayedTasks = taskList.showAllTasks();
         Task markedTask = taskList.markTask(1);
@@ -166,14 +166,14 @@ class TaskListTest {
     }
 
     @Test
-    void findTasks_secondSearch_replacesDisplayedView() {
+    void showMatchingTasks_secondSearch_replacesDisplayedView() {
         Todo firstMatch = new Todo("read book");
         Todo secondMatch = new Todo("buy milk");
         Todo thirdMatch = new Todo("reread notes");
         TaskList taskList = new TaskList(List.of(firstMatch, secondMatch, thirdMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
-        List<Task> matchingTasks = taskList.findTasks("milk");
+        List<Task> matchingTasks = taskList.showMatchingTasks("milk");
         Task markedTask = taskList.markTask(0);
 
         assertEquals(List.of(secondMatch), matchingTasks);
@@ -187,7 +187,7 @@ class TaskListTest {
         Todo secondMatch = new Todo("reread notes");
         Todo addedMatch = new Todo("read article");
         TaskList taskList = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        taskList.findTasks("read");
+        taskList.showMatchingTasks("read");
 
         taskList.addTask(addedMatch);
         Task markedTask = taskList.markTask(1);
