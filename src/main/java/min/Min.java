@@ -42,6 +42,10 @@ public class Min {
      * @param storage The storage used to save task data.
      */
     Min(Parser parser, TaskList tasks, Storage storage) {
+        assert parser != null : "Parser must not be null.";
+        assert tasks != null : "Task list must not be null.";
+        assert storage != null : "Storage must not be null.";
+
         this.parser = parser;
         this.tasks = tasks;
         this.storage = storage;
@@ -208,6 +212,8 @@ public class Min {
      */
     private String executeCommand(String input) throws MinException, IOException {
         Command command = this.parser.parseCommand(input);
+
+        assert command != null : "Parser must return a command or throw an exception.";
 
         switch (command) {
             case BYE:

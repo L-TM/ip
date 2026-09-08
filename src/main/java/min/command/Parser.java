@@ -56,6 +56,12 @@ public class Parser {
     public int parseTaskIndex(String input, Command command, int taskCount)
             throws MinException {
         String taskNumberText = extractArguments(input, command);
+        assert taskCount >= 0 : "Task count must not be negative.";
+        assert command == Command.MARK
+                || command == Command.UNMARK
+                || command == Command.DELETE
+                : "Only mark, unmark, and delete commands use task indexes.";
+
         if (taskNumberText.isEmpty()) {
             throw new MinException("Please provide a task number to " + command.getWord() + ".");
         }
@@ -154,8 +160,13 @@ public class Parser {
         }
         return new Event(description, from, to);
     }
-    
+
     private String extractArguments(String input, Command command) {
+        assert input != null : "Command input must not be null.";
+        assert command != null : "Command must not be null.";
+        assert command.matches(input)
+                : "Input must match the command whose details are being parsed.";
+
         return input.substring(command.getWord().length()).trim();
     }
 

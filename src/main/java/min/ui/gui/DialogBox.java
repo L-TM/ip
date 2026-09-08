@@ -36,6 +36,10 @@ public class DialogBox extends HBox {
                     "Unable to load DialogBox.fxml.", e);
         }
 
+        assert this.dialog != null : "dialog must be injected from FXML.";
+        assert this.displayPicture != null
+                : "displayPicture must be injected from FXML.";
+
         this.dialog.setText(text);
         this.displayPicture.setImage(image);
     }
