@@ -48,7 +48,7 @@ public class MainWindow {
     public void setMin(Min min) {
         this.min = min;
         this.dialogContainer.getChildren().add(
-                DialogBox.getMinDialog(
+                DialogBox.createMinDialog(
                         this.min.getWelcomeMessage(), this.minImage));
     }
 
@@ -65,8 +65,8 @@ public class MainWindow {
 
         String response = this.min.getResponse(input);
         this.dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, this.userImage),
-                DialogBox.getMinDialog(response, this.minImage)
+                DialogBox.createUserDialog(input, this.userImage),
+                DialogBox.createMinDialog(response, this.minImage)
         );
         this.userInput.clear();
 

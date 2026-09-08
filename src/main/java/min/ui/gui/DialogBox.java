@@ -58,7 +58,7 @@ public class DialogBox extends HBox {
      * @param image The user's profile image.
      * @return The created dialog box.
      */
-    public static DialogBox getUserDialog(String text, Image image) {
+    public static DialogBox createUserDialog(String text, Image image) {
         return new DialogBox(text, image);
     }
 
@@ -69,7 +69,7 @@ public class DialogBox extends HBox {
      * @param image Min's profile image.
      * @return The created dialog box.
      */
-    public static DialogBox getMinDialog(String text, Image image) {
+    public static DialogBox createMinDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
         dialogBox.flip();
         return dialogBox;
