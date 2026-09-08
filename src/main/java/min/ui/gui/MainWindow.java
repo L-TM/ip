@@ -7,7 +7,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -16,7 +15,7 @@ import min.Min;
 /**
  * Controller for the main GUI.
  */
-public class MainWindow extends AnchorPane {
+public class MainWindow {
     private static final Duration EXIT_DELAY = Duration.seconds(1);
 
     @FXML
