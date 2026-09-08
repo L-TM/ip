@@ -135,6 +135,74 @@ public class Min {
     }
 
     /**
+     * Finds matching tasks and returns them as a numbered list.
+     *
+     * @param input The find command entered by the user.
+     * @return The formatted matching-task list.
+     * @throws MinException If the find keyword is missing.
+     */
+    private String findTasks(String input) throws MinException {
+        return formatTaskList(
+                "Here are the matching tasks in your list:",
+                this.tasks.showMatchingTasks(this.parser.parseFindKeyword(input)));
+    }
+
+    /**
+     * Marks the selected task, saves the task list, and returns its confirmation.
+     *
+     * @param input The mark command entered by the user.
+     * @return The confirmation message.
+     * @throws MinException If the task number is invalid.
+     * @throws IOException If the task list cannot be saved.
+     */
+    private String markTask(String input) throws MinException, IOException {
+        int taskIndex = this.parser.parseTaskIndex(
+                input, Command.MARK, this.tasks.getDisplayedTaskCount());
+        Task markedTask = this.tasks.markTask(taskIndex);
+        this.storage.save(this.tasks.getTasks());
+
+        return "Nice! I've marked this task as done:\n"
+                + "   " + markedTask;
+    }
+
+    /**
+     * Unmarks the selected task, saves the task list, and returns its confirmation.
+     *
+     * @param input The unmark command entered by the user.
+     * @return The confirmation message.
+     * @throws MinException If the task number is invalid.
+     * @throws IOException If the task list cannot be saved.
+     */
+    private String unmarkTask(String input) throws MinException, IOException {
+        int taskIndex = this.parser.parseTaskIndex(
+                input, Command.UNMARK, this.tasks.getDisplayedTaskCount());
+        Task unmarkedTask = this.tasks.unmarkTask(taskIndex);
+        this.storage.save(this.tasks.getTasks());
+
+        return "OK, I've marked this task as not done yet:\n"
+                + "   " + unmarkedTask;
+    }
+
+    /**
+     * Deletes the selected task, saves the task list, and returns its confirmation.
+     *
+     * @param input The delete command entered by the user.
+     * @return The confirmation message.
+     * @throws MinException If the task number is invalid.
+     * @throws IOException If the task list cannot be saved.
+     */
+    private String deleteTask(String input) throws MinException, IOException {
+        int taskIndex = this.parser.parseTaskIndex(
+                input, Command.DELETE, this.tasks.getDisplayedTaskCount());
+        Task deletedTask = this.tasks.deleteTask(taskIndex);
+        this.storage.save(this.tasks.getTasks());
+
+        return " Got it. I've removed this task:\n"
+                + "   " + deletedTask + "\n"
+                + " Now you have " + this.tasks.size() + " tasks in the list.";
+    }
+
+    /**
      * Executes one command and returns Min's response.
      *
      * @param input The command entered by the user.
@@ -155,30 +223,13 @@ public class Min {
                         "Here are the tasks in your list:",
                         this.tasks.showAllTasks());
             case FIND:
-                return formatTaskList(
-                        "Here are the matching tasks in your list:",
-                        this.tasks.findTasks(this.parser.parseFindKeyword(input)));
+                return findTasks(input);
             case MARK:
-                Task markedTask = this.tasks.markTask(this.parser.parseTaskIndex(
-                        input, command, this.tasks.getDisplayedTaskCount()));
-                this.storage.save(this.tasks.getTasks());
-                return "Nice! I've marked this task as done:\n"
-                        + "   " + markedTask;
+                return markTask(input);
             case UNMARK:
-                Task unmarkedTask = this.tasks.unmarkTask(
-                        this.parser.parseTaskIndex(
-                                input, command, this.tasks.getDisplayedTaskCount()));
-                this.storage.save(this.tasks.getTasks());
-                return "OK, I've marked this task as not done yet:\n"
-                        + "   " + unmarkedTask;
+                return unmarkTask(input);
             case DELETE:
-                int taskIndex = this.parser.parseTaskIndex(
-                        input, command, this.tasks.getDisplayedTaskCount());
-                Task deletedTask = this.tasks.deleteTask(taskIndex);
-                this.storage.save(this.tasks.getTasks());
-                return " Got it. I've removed this task:\n"
-                        + "   " + deletedTask + "\n"
-                        + " Now you have " + this.tasks.size() + " tasks in the list.";
+                return deleteTask(input);
             case TODO:
                 return addTask(this.parser.parseTodo(input));
             case DEADLINE:

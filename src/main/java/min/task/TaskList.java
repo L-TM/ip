@@ -48,7 +48,7 @@ public class TaskList {
      * @param keyword The text to match against task descriptions.
      * @return A read-only list of matching tasks.
      */
-    public List<Task> findTasks(String keyword) {
+    public List<Task> showMatchingTasks(String keyword) {
         assert keyword != null && !keyword.isBlank()
                 : "Find keyword must not be blank.";
 
