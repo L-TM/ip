@@ -7,7 +7,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -16,7 +15,7 @@ import min.Min;
 /**
  * Controller for the main GUI.
  */
-public class MainWindow extends AnchorPane {
+public class MainWindow {
     private static final Duration EXIT_DELAY = Duration.seconds(1);
 
     @FXML
@@ -38,6 +37,11 @@ public class MainWindow extends AnchorPane {
     /** Keeps the conversation pane scrolled to the latest dialog. */
     @FXML
     public void initialize() {
+        assert this.scrollPane != null : "scrollPane must be injected from FXML.";
+        assert this.dialogContainer != null : "dialogContainer must be injected from FXML.";
+        assert this.userInput != null : "userInput must be injected from FXML.";
+        assert this.sendButton != null : "sendButton must be injected from FXML.";
+
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 
@@ -47,9 +51,11 @@ public class MainWindow extends AnchorPane {
      * @param min The Min instance.
      */
     public void setMin(Min min) {
+        assert min != null : "MainWindow requires a Min instance.";
+
         this.min = min;
         this.dialogContainer.getChildren().add(
-                DialogBox.getMinDialog(
+                DialogBox.createMinDialog(
                         this.min.getWelcomeMessage(), this.minImage));
     }
 
@@ -59,6 +65,8 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        assert this.min != null : "setMin must be called before handling user input.";
+
         String input = this.userInput.getText().trim();
         if (input.isEmpty()) {
             return;
@@ -66,8 +74,8 @@ public class MainWindow extends AnchorPane {
 
         String response = this.min.getResponse(input);
         this.dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, this.userImage),
-                DialogBox.getMinDialog(response, this.minImage)
+                DialogBox.createUserDialog(input, this.userImage),
+                DialogBox.createMinDialog(response, this.minImage)
         );
         this.userInput.clear();
 
