@@ -4,7 +4,7 @@ package min.task;
 public abstract class Task {
     protected static final String FILE_FIELD_SEPARATOR = " | ";
 
-    private String description;
+    private final String description;
     private boolean isDone;
 
     public Task(String description) {
