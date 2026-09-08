@@ -39,14 +39,14 @@ public class TaskList {
      * @return A read-only list of matching tasks.
      */
     public List<Task> findTasks(String keyword) {
+        List<Task> matchingTasks = this.tasks.stream()
+                .filter(task -> task.getDescription().contains(keyword))
+                .toList();
+
         this.displayedTasks.clear();
-        for (Task task : this.tasks) {
-            if (task.getDescription().contains(keyword)) {
-                this.displayedTasks.add(task);
-            }
-        }
+        this.displayedTasks.addAll(matchingTasks);
         this.isShowingAllTasks = false;
-        return List.copyOf(this.displayedTasks);
+        return matchingTasks;
     }
 
     /** Restores and returns the complete task list as the displayed view. */
