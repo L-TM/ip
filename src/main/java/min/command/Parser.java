@@ -55,7 +55,7 @@ public class Parser {
      */
     public int parseTaskIndex(String input, Command command, int taskCount)
             throws MinException {
-        String taskNumberText = getDetails(input, command);
+        String taskNumberText = extractArguments(input, command);
         if (taskNumberText.isEmpty()) {
             throw new MinException("Please provide a task number to " + command.getWord() + ".");
         }
@@ -82,7 +82,7 @@ public class Parser {
      * @throws MinException If the todo description is missing.
      */
     public Todo parseTodo(String input) throws MinException {
-        String description = getDetails(input, Command.TODO);
+        String description = extractArguments(input, Command.TODO);
         if (description.isEmpty()) {
             throw new MinException(INVALID_TODO_MESSAGE);
         }
@@ -97,7 +97,7 @@ public class Parser {
      * @throws MinException If no find keyword is provided.
      */
     public String parseFindKeyword(String input) throws MinException {
-        String keyword = getDetails(input, Command.FIND);
+        String keyword = extractArguments(input, Command.FIND);
         if (keyword.isEmpty()) {
             throw new MinException(INVALID_FIND_MESSAGE);
         }
@@ -112,7 +112,7 @@ public class Parser {
      * @throws MinException If the deadline details or date are invalid.
      */
     public Deadline parseDeadline(String input) throws MinException {
-        String deadlineDetails = getDetails(input, Command.DEADLINE);
+        String deadlineDetails = extractArguments(input, Command.DEADLINE);
         int byIndex = deadlineDetails.indexOf(BY_SEPARATOR);
         if (byIndex == -1) {
             throw new MinException(INVALID_DEADLINE_MESSAGE);
@@ -134,7 +134,7 @@ public class Parser {
      * @throws MinException If the event details are invalid.
      */
     public Event parseEvent(String input) throws MinException {
-        String eventDetails = getDetails(input, Command.EVENT);
+        String eventDetails = extractArguments(input, Command.EVENT);
         int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
         if (fromIndex == -1) {
             throw new MinException(INVALID_EVENT_MESSAGE);
@@ -154,9 +154,8 @@ public class Parser {
         }
         return new Event(description, from, to);
     }
-
-    // Gets the text after a command word.
-    private String getDetails(String input, Command command) {
+    
+    private String extractArguments(String input, Command command) {
         return input.substring(command.getWord().length()).trim();
     }
 
