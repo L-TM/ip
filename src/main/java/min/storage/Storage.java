@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import min.task.Deadline;
@@ -48,20 +47,18 @@ public class Storage {
     /**
      * Loads all saved tasks from the data file.
      *
-     * @return The loaded tasks, or an empty list when no data file exists.
+     * @return A read-only list of loaded tasks, or an empty list when no data file exists.
      * @throws IOException If the data file cannot be read.
      * @throws java.time.format.DateTimeParseException If a saved deadline date is invalid.
      */
-    public ArrayList<Task> load() throws IOException {
-        ArrayList<Task> tasks = new ArrayList<>();
+    public List<Task> load() throws IOException {
         if (!Files.exists(filePath)) {
-            return tasks;
+            return List.of();
         }
 
-        for (String line : Files.readAllLines(filePath)) {
-            tasks.add(createTask(line));
-        }
-        return tasks;
+        return Files.readAllLines(filePath).stream()
+                .map(line -> this.createTask(line))
+                .toList();
     }
 
     /**

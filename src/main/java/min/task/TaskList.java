@@ -52,18 +52,18 @@ public class TaskList {
         assert keyword != null && !keyword.isBlank()
                 : "Find keyword must not be blank.";
 
+        List<Task> matchingTasks = this.tasks.stream()
+                .filter(task -> task.getDescription().contains(keyword))
+                .toList();
+
         this.displayedTasks.clear();
-        for (Task task : this.tasks) {
-            if (task.getDescription().contains(keyword)) {
-                this.displayedTasks.add(task);
-            }
-        }
+        this.displayedTasks.addAll(matchingTasks);
         this.isShowingAllTasks = false;
 
         assert isDisplayedViewConsistent()
                 : "Displayed tasks must be consistent with the full task list.";
 
-        return List.copyOf(this.displayedTasks);
+        return matchingTasks;
     }
 
     /** Restores and returns the complete task list as the displayed view. */

@@ -3,6 +3,7 @@ package min.command;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 
 import min.exception.MinException;
 import min.task.Deadline;
@@ -36,12 +37,10 @@ public class Parser {
      * @throws MinException If the input does not begin with a valid command word.
      */
     public Command parseCommand(String input) throws MinException {
-        for (Command command : Command.values()) {
-            if (command.matches(input)) {
-                return command;
-            }
-        }
-        throw new MinException(INVALID_COMMAND_MESSAGE);
+        return Arrays.stream(Command.values())
+                .filter(command -> command.matches(input))
+                .findFirst()
+                .orElseThrow(() -> new MinException(INVALID_COMMAND_MESSAGE));
     }
 
     /**
