@@ -38,6 +38,11 @@ public class MainWindow extends AnchorPane {
     /** Keeps the conversation pane scrolled to the latest dialog. */
     @FXML
     public void initialize() {
+        assert this.scrollPane != null : "scrollPane must be injected from FXML.";
+        assert this.dialogContainer != null : "dialogContainer must be injected from FXML.";
+        assert this.userInput != null : "userInput must be injected from FXML.";
+        assert this.sendButton != null : "sendButton must be injected from FXML.";
+
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 
@@ -47,6 +52,8 @@ public class MainWindow extends AnchorPane {
      * @param min The Min instance.
      */
     public void setMin(Min min) {
+        assert min != null : "MainWindow requires a Min instance.";
+
         this.min = min;
         this.dialogContainer.getChildren().add(
                 DialogBox.getMinDialog(
@@ -59,6 +66,8 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        assert this.min != null : "setMin must be called before handling user input.";
+
         String input = this.userInput.getText().trim();
         if (input.isEmpty()) {
             return;

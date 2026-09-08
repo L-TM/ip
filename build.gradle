@@ -66,6 +66,10 @@ shadowJar {
     archiveFileName = 'min.jar'
 }
 
+tasks.withType(JavaExec).configureEach {
+    enableAssertions = true
+}
+
 tasks.register('runCli', JavaExec) {
     group = 'application'
     description = 'Runs the command-line version of Min.'
