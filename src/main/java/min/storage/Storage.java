@@ -4,82 +4,75 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.List;
 
-import min.task.Deadline;
-import min.task.Event;
-import min.task.Task;
-import min.task.Todo;
-
-/** Saves and loads Min tasks on the hard disk. */
-public class Storage {
-    private static final Path DEFAULT_FILE_PATH = Path.of("data", "min.txt");
-
+/**
+ * Saves and loads Min's data on the hard disk, storing one item per line.
+ * <p>
+ * Subclasses supply the conversion between an item and its saved line.
+ *
+ * @param <T> The type of item held in the data file.
+ */
+public abstract class Storage<T> {
     private final Path filePath;
 
-    /** Creates storage that uses Min's default data file. */
-    public Storage() {
-        this(DEFAULT_FILE_PATH);
-    }
+    /**
+     * Creates storage that uses the given data file.
+     *
+     * @param filePath The data file to read and write.
+     */
+    protected Storage(Path filePath) {
+        assert filePath != null : "Data file path must not be null.";
 
-    Storage(Path filePath) {
         this.filePath = filePath;
     }
 
     /**
-     * Rewrites the data file with the current task list.
+     * Rewrites the data file with the given items.
      *
-     * @param tasks The tasks to save.
+     * @param items The items to save.
      * @throws IOException If the data file cannot be written.
      */
-    public void save(List<Task> tasks) throws IOException {
+    public void save(List<T> items) throws IOException {
         Files.createDirectories(filePath.getParent());
 
         try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
-            for (Task task : tasks) {
-                writer.write(task.toFileString());
+            for (T item : items) {
+                writer.write(encode(item));
                 writer.newLine();
             }
         }
     }
 
     /**
-     * Loads all saved tasks from the data file.
+     * Loads all saved items from the data file.
      *
-     * @return A read-only list of loaded tasks, or an empty list when no data file exists.
+     * @return A read-only list of loaded items, or an empty list when no data file exists.
      * @throws IOException If the data file cannot be read.
-     * @throws java.time.format.DateTimeParseException If a saved deadline date is invalid.
      */
-    public List<Task> load() throws IOException {
+    public List<T> load() throws IOException {
         if (!Files.exists(filePath)) {
             return List.of();
         }
 
         return Files.readAllLines(filePath).stream()
-                .map(line -> this.createTask(line))
+                .map(line -> this.decode(line))
                 .toList();
     }
 
     /**
-     * Recreates a task from one line of saved data.
+     * Returns the item in the format used for persistent storage.
+     *
+     * @param item The item to convert.
+     * @return The line to write to the data file.
+     */
+    protected abstract String encode(T item);
+
+    /**
+     * Recreates an item from one line of saved data.
      *
      * @param line A line read from the data file.
-     * @return The recreated task.
-     * @throws IllegalArgumentException If the line has an unknown task type.
+     * @return The recreated item.
      */
-    private Task createTask(String line) {
-        String[] fields = line.split(" \\| ", -1);
-        Task task = switch (fields[0]) {
-            case "T" -> new Todo(fields[2]);
-            case "D" -> new Deadline(fields[2], LocalDate.parse(fields[3]));
-            case "E" -> new Event(fields[2], fields[3], fields[4]);
-            default -> throw new IllegalArgumentException("Unknown task type.");
-        };
-
-        if (fields[1].equals("1")) {
-            task.markAsDone();
-        }
-        return task;
-    }
+    protected abstract T decode(String line);
 }

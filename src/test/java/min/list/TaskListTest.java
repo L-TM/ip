@@ -1,4 +1,4 @@
-package min.task;
+package min.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import min.task.Task;
+import min.task.Todo;
 
 class TaskListTest {
     @Test

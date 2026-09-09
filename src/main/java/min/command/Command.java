@@ -10,7 +10,10 @@ public enum Command {
     DELETE("delete", true),
     TODO("todo", true),
     DEADLINE("deadline", true),
-    EVENT("event", true);
+    EVENT("event", true),
+    NOTE("note", true),
+    NOTES("notes", false),
+    DELETENOTE("deletenote", true);
 
     private final String word;
     private final boolean acceptsArguments;

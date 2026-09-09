@@ -6,12 +6,14 @@ import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 
 import min.exception.MinException;
+import min.note.Note;
 import min.task.Deadline;
 import min.task.Event;
 import min.task.Todo;
 
 /** Parses and validates commands entered by the user. */
 public class Parser {
+    private static final String FILE_FIELD_SEPARATOR = " | ";
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
@@ -26,8 +28,13 @@ public class Parser {
             "Invalid deadline date. Use yyyy-mm-dd.";
     private static final String INVALID_FIND_MESSAGE =
             "Please provide a keyword to find.";
+    private static final String INVALID_NOTE_MESSAGE =
+            "A note needs some text. Use: note <text>.";
+    private static final String INVALID_NOTE_TEXT_MESSAGE =
+            "A note cannot contain \" | \".";
     private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, find, mark, unmark, delete, todo, deadline, or event.";
+            "Invalid command. Use bye, list, find, mark, unmark, delete, todo, deadline, event, "
+                    + "note, notes, or deletenote.";
 
     /**
      * Identifies the command represented by the input.
@@ -54,29 +61,66 @@ public class Parser {
      */
     public int parseTaskIndex(String input, Command command, int taskCount)
             throws MinException {
-        String taskNumberText = extractArguments(input, command);
-        assert taskCount >= 0 : "Task count must not be negative.";
         assert command == Command.MARK
                 || command == Command.UNMARK
                 || command == Command.DELETE
                 : "Only mark, unmark, and delete commands use task indexes.";
 
-        if (taskNumberText.isEmpty()) {
-            throw new MinException("Please provide a task number to " + command.getWord() + ".");
+        return parseItemIndex(
+                extractArguments(input, command), taskCount, "task", command.getWord());
+    }
+
+    /**
+     * Parses a valid note number into a zero-based note index.
+     *
+     * @param input The delete-note command entered by the user.
+     * @param noteCount The number of notes currently displayed.
+     * @return The zero-based index of the requested note.
+     * @throws MinException If the note number is missing, malformed, or outside the note list.
+     */
+    public int parseNoteIndex(String input, int noteCount) throws MinException {
+        return parseItemIndex(
+                extractArguments(input, Command.DELETENOTE), noteCount, "note", "delete");
+    }
+
+    /**
+     * Parses a valid item number into a zero-based item index.
+     *
+     * @param indexText The item number entered by the user.
+     * @param itemCount The number of items the number may refer to.
+     * @param itemName The singular name of the item, used in error messages.
+     * @param action The action being performed, used in error messages.
+     * @return The zero-based index of the requested item.
+     * @throws MinException If the item number is missing, malformed, or outside the item list.
+     */
+    private int parseItemIndex(String indexText, int itemCount, String itemName, String action)
+            throws MinException {
+        assert itemCount >= 0 : "Item count must not be negative.";
+
+        if (indexText.isEmpty()) {
+            throw new MinException("Please provide a " + itemName + " number to " + action + ".");
         }
 
         try {
-            int taskNumber = Integer.parseInt(taskNumberText);
-            if (taskCount == 0) {
-                throw new MinException("There are no tasks to " + command.getWord() + ".");
+            int itemNumber = Integer.parseInt(indexText);
+            if (itemCount == 0) {
+                throw new MinException("There are no " + itemName + "s to " + action + ".");
             }
-            if (taskNumber < 1 || taskNumber > taskCount) {
-                throw new MinException("Task number must be between 1 and " + taskCount + ".");
+            if (itemNumber < 1 || itemNumber > itemCount) {
+                throw new MinException(
+                        capitalize(itemName) + " number must be between 1 and " + itemCount + ".");
             }
-            return taskNumber - 1;
+            return itemNumber - 1;
         } catch (NumberFormatException e) {
-            throw new MinException("The task number must be a whole number.");
+            throw new MinException("The " + itemName + " number must be a whole number.");
         }
+    }
+
+    /** Returns the word with its first letter in upper case. */
+    private static String capitalize(String word) {
+        assert !word.isEmpty() : "Word to capitalize must not be empty.";
+
+        return Character.toUpperCase(word.charAt(0)) + word.substring(1);
     }
 
     /**
@@ -86,6 +130,24 @@ public class Parser {
      * @return The created todo task.
      * @throws MinException If the todo description is missing.
      */
+    /**
+     * Creates a note from the input.
+     *
+     * @param input The command entered by the user.
+     * @return The created note.
+     * @throws MinException If the note text is missing or contains the storage field separator.
+     */
+    public Note parseNote(String input) throws MinException {
+        String text = extractArguments(input, Command.NOTE);
+        if (text.isEmpty()) {
+            throw new MinException(INVALID_NOTE_MESSAGE);
+        }
+        if (text.contains(FILE_FIELD_SEPARATOR)) {
+            throw new MinException(INVALID_NOTE_TEXT_MESSAGE);
+        }
+        return new Note(text);
+    }
+
     public Todo parseTodo(String input) throws MinException {
         String description = extractArguments(input, Command.TODO);
         if (description.isEmpty()) {
