@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import min.exception.MinException;
+import min.note.Note;
 import min.task.Deadline;
 import min.task.Event;
 import min.task.Todo;
@@ -19,6 +20,8 @@ class ParserTest {
     void parseCommand_validCommands_returnsCorrespondingCommands() throws MinException {
         assertEquals(Command.BYE, parser.parseCommand("bye"));
         assertEquals(Command.LIST, parser.parseCommand("list"));
+        assertEquals(Command.LISTTASKS, parser.parseCommand("listtasks"));
+        assertEquals(Command.LISTNOTES, parser.parseCommand("listnotes"));
         assertEquals(Command.FIND, parser.parseCommand("find book"));
         assertEquals(Command.MARK, parser.parseCommand("mark 1"));
         assertEquals(Command.UNMARK, parser.parseCommand("unmark 1"));
@@ -28,6 +31,8 @@ class ParserTest {
                 parser.parseCommand("deadline submit report /by 2026-08-28"));
         assertEquals(Command.EVENT,
                 parser.parseCommand("event meeting /from 2pm /to 4pm"));
+        assertEquals(Command.NOTE, parser.parseCommand("note watch Dune"));
+        assertEquals(Command.DELETENOTE, parser.parseCommand("deletenote 1"));
     }
 
     @Test
@@ -39,17 +44,21 @@ class ParserTest {
         assertEquals(Command.TODO, parser.parseCommand("todo"));
         assertEquals(Command.DEADLINE, parser.parseCommand("deadline"));
         assertEquals(Command.EVENT, parser.parseCommand("event"));
+        assertEquals(Command.NOTE, parser.parseCommand("note"));
+        assertEquals(Command.DELETENOTE, parser.parseCommand("deletenote"));
     }
 
     @Test
     void parseCommand_invalidCommands_throwsMinException() {
-        String expectedMessage = "Invalid command. Use bye, list, find, mark, unmark, "
-                + "delete, todo, deadline, or event.";
+        String expectedMessage = "Invalid command. Use bye, list, listtasks, listnotes, find, "
+                + "mark, unmark, delete, todo, deadline, event, note, or deletenote.";
 
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand(""));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("dance"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("byebye"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("list now"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("listnotes now"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("notes"));
     }
 
     @Test
@@ -189,6 +198,65 @@ class ParserTest {
                 () -> parser.parseEvent("event meeting /from  /to 4pm"));
         assertThrowsMinException(expectedMessage,
                 () -> parser.parseEvent("event meeting /from 2pm /to"));
+    }
+
+    @Test
+    void parseNote_validInput_returnsNote() throws MinException {
+        Note note = parser.parseNote("note watch Dune");
+
+        assertEquals("watch Dune", note.getText());
+        assertEquals("N | watch Dune", note.toFileString());
+    }
+
+    @Test
+    void parseNote_surroundingWhitespace_isTrimmed() throws MinException {
+        assertEquals("watch Dune", parser.parseNote("note   watch Dune  ").getText());
+    }
+
+    @Test
+    void parseNote_missingText_throwsMinException() {
+        String expectedMessage = "A note needs some text. Use: note <text>.";
+
+        assertThrowsMinException(expectedMessage, () -> parser.parseNote("note"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseNote("note    "));
+    }
+
+    @Test
+    void parseNote_textContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("A note cannot contain \" | \".",
+                () -> parser.parseNote("note watch Dune | part two"));
+    }
+
+    @Test
+    void parseNoteIndex_validNoteNumbers_returnsZeroBasedIndexes() throws MinException {
+        assertEquals(0, parser.parseNoteIndex("deletenote 1", 3));
+        assertEquals(2, parser.parseNoteIndex("deletenote 3", 3));
+    }
+
+    @Test
+    void parseNoteIndex_missingNoteNumber_throwsMinException() {
+        assertThrowsMinException("Please provide a note number to delete.",
+                () -> parser.parseNoteIndex("deletenote", 3));
+    }
+
+    @Test
+    void parseNoteIndex_nonNumericNoteNumber_throwsMinException() {
+        assertThrowsMinException("The note number must be a whole number.",
+                () -> parser.parseNoteIndex("deletenote first", 3));
+    }
+
+    @Test
+    void parseNoteIndex_noteNumberOutsideList_throwsMinException() {
+        String expectedMessage = "Note number must be between 1 and 3.";
+
+        assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 0", 3));
+        assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 4", 3));
+    }
+
+    @Test
+    void parseNoteIndex_emptyNoteList_throwsMinException() {
+        assertThrowsMinException("There are no notes to delete.",
+                () -> parser.parseNoteIndex("deletenote 1", 0));
     }
 
     private void assertThrowsMinException(String expectedMessage, Executable executable) {

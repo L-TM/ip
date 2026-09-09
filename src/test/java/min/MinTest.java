@@ -9,25 +9,29 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import min.command.Parser;
-import min.storage.Storage;
+import min.list.NoteList;
+import min.list.TaskList;
+import min.note.Note;
+import min.storage.NoteStorage;
+import min.storage.TaskStorage;
 import min.task.Task;
-import min.task.TaskList;
 import min.task.Todo;
 
 class MinTest {
     private final Parser parser = new Parser();
-    private final RecordingStorage storage = new RecordingStorage();
+    private final RecordingTaskStorage storage = new RecordingTaskStorage();
+    private final RecordingNoteStorage noteStorage = new RecordingNoteStorage();
 
     @Test
     void isExitCommand_byeWithSurroundingWhitespace_returnsTrue() {
-        Min min = new Min(parser, new TaskList(List.of()), storage);
+        Min min = createMin(new TaskList(List.of()));
 
         assertTrue(min.isExitCommand("  bye  "));
     }
 
     @Test
     void isExitCommand_nonByeInputs_returnsFalse() {
-        Min min = new Min(parser, new TaskList(List.of()), storage);
+        Min min = createMin(new TaskList(List.of()));
 
         assertFalse(min.isExitCommand("byebye"));
         assertFalse(min.isExitCommand("list"));
@@ -36,7 +40,7 @@ class MinTest {
 
     @Test
     void getResponse_bye_returnsGoodbyeMessage() {
-        Min min = new Min(parser, new TaskList(List.of()), storage);
+        Min min = createMin(new TaskList(List.of()));
 
         assertEquals(" Bye. Hope to see you again soon!", min.getResponse("bye"));
     }
@@ -44,7 +48,7 @@ class MinTest {
     @Test
     void getResponse_todo_addsTaskAndReturnsConfirmation() {
         TaskList tasks = new TaskList(List.of());
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         String response = min.getResponse("todo read book");
 
@@ -58,7 +62,7 @@ class MinTest {
     @Test
     void getResponse_deadline_addsTaskAndReturnsConfirmation() {
         TaskList tasks = new TaskList(List.of());
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         String response = min.getResponse("deadline submit report /by 2026-08-28");
 
@@ -73,7 +77,7 @@ class MinTest {
     @Test
     void getResponse_event_addsTaskAndReturnsConfirmation() {
         TaskList tasks = new TaskList(List.of());
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         String response = min.getResponse("event meeting /from 2pm /to 4pm");
 
@@ -88,7 +92,7 @@ class MinTest {
     @Test
     void getResponse_mark_marksTaskAndReturnsConfirmation() {
         Todo task = new Todo("read book");
-        Min min = new Min(parser, new TaskList(List.of(task)), storage);
+        Min min = createMin(new TaskList(List.of(task)));
 
         String response = min.getResponse("mark 1");
 
@@ -102,7 +106,7 @@ class MinTest {
     void getResponse_unmark_unmarksTaskAndReturnsConfirmation() {
         Todo task = new Todo("read book");
         task.markAsDone();
-        Min min = new Min(parser, new TaskList(List.of(task)), storage);
+        Min min = createMin(new TaskList(List.of(task)));
 
         String response = min.getResponse("unmark 1");
 
@@ -117,7 +121,7 @@ class MinTest {
         Todo deletedTask = new Todo("read book");
         Todo remainingTask = new Todo("buy milk");
         TaskList tasks = new TaskList(List.of(deletedTask, remainingTask));
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         String response = min.getResponse("delete 1");
 
@@ -129,12 +133,40 @@ class MinTest {
     }
 
     @Test
-    void getResponse_list_returnsNumberedTasks() {
+    void getResponse_list_returnsNumberedTasksAndNotes() {
         TaskList tasks = new TaskList(List.of(
                 new Todo("read book"), new Todo("buy milk")));
-        Min min = new Min(parser, tasks, storage);
+        NoteList notes = new NoteList(List.of(new Note("watch Dune")));
+        Min min = createMin(tasks, notes);
 
         String response = min.getResponse("list");
+
+        assertEquals("Here are the tasks in your list:\n"
+                + " 1.[T][ ] read book\n"
+                + " 2.[T][ ] buy milk\n"
+                + "\n"
+                + "Here are the notes in your list:\n"
+                + " 1.watch Dune", response);
+        assertEquals(0, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_list_emptyLists_returnsBothHeadings() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("Here are the tasks in your list:\n"
+                + "\n"
+                + "Here are the notes in your list:", min.getResponse("list"));
+    }
+
+    @Test
+    void getResponse_listtasks_returnsNumberedTasksOnly() {
+        TaskList tasks = new TaskList(List.of(
+                new Todo("read book"), new Todo("buy milk")));
+        NoteList notes = new NoteList(List.of(new Note("watch Dune")));
+        Min min = createMin(tasks, notes);
+
+        String response = min.getResponse("listtasks");
 
         assertEquals("Here are the tasks in your list:\n"
                 + " 1.[T][ ] read book\n"
@@ -143,16 +175,124 @@ class MinTest {
     }
 
     @Test
-    void getResponse_find_returnsNumberedMatches() {
+    void getResponse_find_returnsNumberedTaskAndNoteMatches() {
         TaskList tasks = new TaskList(List.of(
                 new Todo("read book"), new Todo("buy milk")));
-        Min min = new Min(parser, tasks, storage);
+        NoteList notes = new NoteList(List.of(
+                new Note("read the CS2103T guide"), new Note("watch Dune")));
+        Min min = createMin(tasks, notes);
 
         String response = min.getResponse("find read");
 
         assertEquals("Here are the matching tasks in your list:\n"
-                + " 1.[T][ ] read book", response);
+                + " 1.[T][ ] read book\n"
+                + "\n"
+                + "Here are the matching notes in your list:\n"
+                + " 1.read the CS2103T guide", response);
         assertEquals(0, storage.getSaveCount());
+        assertEquals(0, noteStorage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_note_addsNoteAndReturnsConfirmation() {
+        NoteList notes = new NoteList(List.of());
+        Min min = createMin(new TaskList(List.of()), notes);
+
+        String response = min.getResponse("note watch Dune");
+
+        assertEquals(" Got it. I've added this note:\n"
+                + "   watch Dune\n"
+                + " Now you have 1 notes in the list.", response);
+        assertEquals("N | watch Dune", notes.getNotes().get(0).toFileString());
+        assertEquals(1, noteStorage.getSaveCount());
+        assertEquals(0, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_noteWithoutText_returnsError() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("A note needs some text. Use: note <text>.", min.getResponse("note"));
+        assertEquals(0, noteStorage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_noteContainingFieldSeparator_returnsError() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("A note cannot contain \" | \".",
+                min.getResponse("note watch Dune | part two"));
+        assertEquals(0, noteStorage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_listnotes_returnsNumberedNotes() {
+        NoteList notes = new NoteList(List.of(
+                new Note("watch Dune"), new Note("read the CS2103T guide")));
+        Min min = createMin(new TaskList(List.of()), notes);
+
+        String response = min.getResponse("listnotes");
+
+        assertEquals("Here are the notes in your list:\n"
+                + " 1.watch Dune\n"
+                + " 2.read the CS2103T guide", response);
+        assertEquals(0, noteStorage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_listnotes_emptyList_returnsHeadingOnly() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("Here are the notes in your list:", min.getResponse("listnotes"));
+    }
+
+    @Test
+    void getResponse_deletenote_removesNoteAndReturnsConfirmation() {
+        Note deletedNote = new Note("watch Dune");
+        Note remainingNote = new Note("read the CS2103T guide");
+        NoteList notes = new NoteList(List.of(deletedNote, remainingNote));
+        Min min = createMin(new TaskList(List.of()), notes);
+
+        String response = min.getResponse("deletenote 1");
+
+        assertEquals(" Got it. I've removed this note:\n"
+                + "   watch Dune\n"
+                + " Now you have 1 notes in the list.", response);
+        assertEquals(List.of(remainingNote), notes.getNotes());
+        assertEquals(1, noteStorage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_findThenDeletenote_removesDisplayedMatch() {
+        Note nonMatch = new Note("watch Dune");
+        Note match = new Note("read the CS2103T guide");
+        NoteList notes = new NoteList(List.of(nonMatch, match));
+        Min min = createMin(new TaskList(List.of()), notes);
+
+        min.getResponse("find read");
+        min.getResponse("deletenote 1");
+
+        assertEquals(List.of(nonMatch), notes.getNotes());
+    }
+
+    @Test
+    void getResponse_deletenoteOutsideFindResults_returnsRangeError() {
+        NoteList notes = new NoteList(List.of(
+                new Note("watch Dune"), new Note("read the CS2103T guide")));
+        Min min = createMin(new TaskList(List.of()), notes);
+        min.getResponse("find read");
+
+        String response = min.getResponse("deletenote 2");
+
+        assertEquals("Note number must be between 1 and 1.", response);
+        assertEquals(2, notes.size());
+    }
+
+    @Test
+    void getResponse_deletenoteWithEmptyNoteList_returnsError() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("There are no notes to delete.", min.getResponse("deletenote 1"));
     }
 
     @Test
@@ -161,7 +301,7 @@ class MinTest {
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList tasks = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         min.getResponse("find read");
         min.getResponse("mark 2");
@@ -176,7 +316,7 @@ class MinTest {
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList tasks = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
         min.getResponse("find read");
 
         String response = min.getResponse("mark 3");
@@ -186,26 +326,47 @@ class MinTest {
     }
 
     @Test
-    void getResponse_listAfterFind_restoresFullListNumbering() {
+    void getResponse_listtasksAfterFind_restoresFullListNumbering() {
         Todo firstMatch = new Todo("read book");
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
         TaskList tasks = new TaskList(List.of(firstMatch, nonMatch, secondMatch));
-        Min min = new Min(parser, tasks, storage);
+        Min min = createMin(tasks);
 
         min.getResponse("find read");
-        min.getResponse("list");
+        min.getResponse("listtasks");
         min.getResponse("mark 2");
 
         assertTrue(nonMatch.isDone());
         assertFalse(secondMatch.isDone());
     }
 
-    private static class RecordingStorage extends Storage {
+    private Min createMin(TaskList tasks) {
+        return createMin(tasks, new NoteList(List.of()));
+    }
+
+    private Min createMin(TaskList tasks, NoteList notes) {
+        return new Min(parser, tasks, storage, notes, noteStorage);
+    }
+
+    private static class RecordingTaskStorage extends TaskStorage {
         private int saveCount;
 
         @Override
         public void save(List<Task> tasks) {
+            saveCount++;
+        }
+
+        private int getSaveCount() {
+            return saveCount;
+        }
+    }
+
+    private static class RecordingNoteStorage extends NoteStorage {
+        private int saveCount;
+
+        @Override
+        public void save(List<Note> notes) {
             saveCount++;
         }
 

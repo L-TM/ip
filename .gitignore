@@ -19,5 +19,6 @@ _temp/
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
 
-# Min task data
+# Min data files
 /data/min.txt
+/data/notes.txt

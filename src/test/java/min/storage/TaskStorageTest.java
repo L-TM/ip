@@ -21,14 +21,14 @@ import min.task.Event;
 import min.task.Task;
 import min.task.Todo;
 
-class StorageTest {
+class TaskStorageTest {
     private Path dataFile;
-    private Storage storage;
+    private TaskStorage storage;
 
     @BeforeEach
     void setUp(@TempDir Path tempDirectory) {
         dataFile = tempDirectory.resolve("data/min.txt");
-        storage = new Storage(dataFile);
+        storage = new TaskStorage(dataFile);
     }
 
     @Test
