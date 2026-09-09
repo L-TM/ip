@@ -133,12 +133,40 @@ class MinTest {
     }
 
     @Test
-    void getResponse_list_returnsNumberedTasks() {
+    void getResponse_list_returnsNumberedTasksAndNotes() {
         TaskList tasks = new TaskList(List.of(
                 new Todo("read book"), new Todo("buy milk")));
-        Min min = createMin(tasks);
+        NoteList notes = new NoteList(List.of(new Note("watch Dune")));
+        Min min = createMin(tasks, notes);
 
         String response = min.getResponse("list");
+
+        assertEquals("Here are the tasks in your list:\n"
+                + " 1.[T][ ] read book\n"
+                + " 2.[T][ ] buy milk\n"
+                + "\n"
+                + "Here are the notes in your list:\n"
+                + " 1.watch Dune", response);
+        assertEquals(0, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_list_emptyLists_returnsBothHeadings() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals("Here are the tasks in your list:\n"
+                + "\n"
+                + "Here are the notes in your list:", min.getResponse("list"));
+    }
+
+    @Test
+    void getResponse_listtasks_returnsNumberedTasksOnly() {
+        TaskList tasks = new TaskList(List.of(
+                new Todo("read book"), new Todo("buy milk")));
+        NoteList notes = new NoteList(List.of(new Note("watch Dune")));
+        Min min = createMin(tasks, notes);
+
+        String response = min.getResponse("listtasks");
 
         assertEquals("Here are the tasks in your list:\n"
                 + " 1.[T][ ] read book\n"
@@ -158,6 +186,7 @@ class MinTest {
 
         assertEquals("Here are the matching tasks in your list:\n"
                 + " 1.[T][ ] read book\n"
+                + "\n"
                 + "Here are the matching notes in your list:\n"
                 + " 1.read the CS2103T guide", response);
         assertEquals(0, storage.getSaveCount());
@@ -197,12 +226,12 @@ class MinTest {
     }
 
     @Test
-    void getResponse_notes_returnsNumberedNotes() {
+    void getResponse_listnotes_returnsNumberedNotes() {
         NoteList notes = new NoteList(List.of(
                 new Note("watch Dune"), new Note("read the CS2103T guide")));
         Min min = createMin(new TaskList(List.of()), notes);
 
-        String response = min.getResponse("notes");
+        String response = min.getResponse("listnotes");
 
         assertEquals("Here are the notes in your list:\n"
                 + " 1.watch Dune\n"
@@ -211,10 +240,10 @@ class MinTest {
     }
 
     @Test
-    void getResponse_notes_emptyList_returnsHeadingOnly() {
+    void getResponse_listnotes_emptyList_returnsHeadingOnly() {
         Min min = createMin(new TaskList(List.of()));
 
-        assertEquals("Here are the notes in your list:", min.getResponse("notes"));
+        assertEquals("Here are the notes in your list:", min.getResponse("listnotes"));
     }
 
     @Test
@@ -297,7 +326,7 @@ class MinTest {
     }
 
     @Test
-    void getResponse_listAfterFind_restoresFullListNumbering() {
+    void getResponse_listtasksAfterFind_restoresFullListNumbering() {
         Todo firstMatch = new Todo("read book");
         Todo nonMatch = new Todo("buy milk");
         Todo secondMatch = new Todo("reread notes");
@@ -305,7 +334,7 @@ class MinTest {
         Min min = createMin(tasks);
 
         min.getResponse("find read");
-        min.getResponse("list");
+        min.getResponse("listtasks");
         min.getResponse("mark 2");
 
         assertTrue(nonMatch.isDone());

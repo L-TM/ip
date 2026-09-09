@@ -20,6 +20,8 @@ class ParserTest {
     void parseCommand_validCommands_returnsCorrespondingCommands() throws MinException {
         assertEquals(Command.BYE, parser.parseCommand("bye"));
         assertEquals(Command.LIST, parser.parseCommand("list"));
+        assertEquals(Command.LISTTASKS, parser.parseCommand("listtasks"));
+        assertEquals(Command.LISTNOTES, parser.parseCommand("listnotes"));
         assertEquals(Command.FIND, parser.parseCommand("find book"));
         assertEquals(Command.MARK, parser.parseCommand("mark 1"));
         assertEquals(Command.UNMARK, parser.parseCommand("unmark 1"));
@@ -30,7 +32,6 @@ class ParserTest {
         assertEquals(Command.EVENT,
                 parser.parseCommand("event meeting /from 2pm /to 4pm"));
         assertEquals(Command.NOTE, parser.parseCommand("note watch Dune"));
-        assertEquals(Command.NOTES, parser.parseCommand("notes"));
         assertEquals(Command.DELETENOTE, parser.parseCommand("deletenote 1"));
     }
 
@@ -49,14 +50,15 @@ class ParserTest {
 
     @Test
     void parseCommand_invalidCommands_throwsMinException() {
-        String expectedMessage = "Invalid command. Use bye, list, find, mark, unmark, "
-                + "delete, todo, deadline, event, note, notes, or deletenote.";
+        String expectedMessage = "Invalid command. Use bye, list, listtasks, listnotes, find, "
+                + "mark, unmark, delete, todo, deadline, event, note, or deletenote.";
 
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand(""));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("dance"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("byebye"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("list now"));
-        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("notes now"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("listnotes now"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("notes"));
     }
 
     @Test

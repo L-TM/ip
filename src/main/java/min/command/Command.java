@@ -4,6 +4,8 @@ package min.command;
 public enum Command {
     BYE("bye", false),
     LIST("list", false),
+    LISTTASKS("listtasks", false),
+    LISTNOTES("listnotes", false),
     FIND("find", true),
     MARK("mark", true),
     UNMARK("unmark", true),
@@ -12,7 +14,6 @@ public enum Command {
     DEADLINE("deadline", true),
     EVENT("event", true),
     NOTE("note", true),
-    NOTES("notes", false),
     DELETENOTE("deletenote", true);
 
     private final String word;

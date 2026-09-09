@@ -18,6 +18,13 @@ import min.task.Task;
 public class Min {
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
+    private static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
+    private static final String NOTE_LIST_HEADING = "Here are the notes in your list:";
+    private static final String MATCHING_TASK_HEADING =
+            "Here are the matching tasks in your list:";
+    private static final String MATCHING_NOTE_HEADING =
+            "Here are the matching notes in your list:";
+    private static final String SECTION_SEPARATOR = "\n\n";
     private static final String WELCOME_MESSAGE =
             "Hello! I'm Min.\nWhat can I do for you?";
 
@@ -158,13 +165,16 @@ public class Min {
     private String findItems(String input) throws MinException {
         String keyword = this.parser.parseFindKeyword(input);
 
-        return formatItemList(
-                "Here are the matching tasks in your list:",
-                this.tasks.showMatchingTasks(keyword))
-                + "\n"
-                + formatItemList(
-                        "Here are the matching notes in your list:",
-                        this.notes.showMatchingNotes(keyword));
+        return formatItemList(MATCHING_TASK_HEADING, this.tasks.showMatchingTasks(keyword))
+                + SECTION_SEPARATOR
+                + formatItemList(MATCHING_NOTE_HEADING, this.notes.showMatchingNotes(keyword));
+    }
+
+    /** Returns every task followed by every note, each as a numbered list. */
+    private String listAllItems() {
+        return formatItemList(TASK_LIST_HEADING, this.tasks.showAllTasks())
+                + SECTION_SEPARATOR
+                + formatItemList(NOTE_LIST_HEADING, this.notes.showAllNotes());
     }
 
     /**
@@ -273,13 +283,11 @@ public class Min {
             case BYE:
                 return " Bye. Hope to see you again soon!";
             case LIST:
-                return formatItemList(
-                        "Here are the tasks in your list:",
-                        this.tasks.showAllTasks());
-            case NOTES:
-                return formatItemList(
-                        "Here are the notes in your list:",
-                        this.notes.showAllNotes());
+                return listAllItems();
+            case LISTTASKS:
+                return formatItemList(TASK_LIST_HEADING, this.tasks.showAllTasks());
+            case LISTNOTES:
+                return formatItemList(NOTE_LIST_HEADING, this.notes.showAllNotes());
             case FIND:
                 return findItems(input);
             case MARK:

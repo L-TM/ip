@@ -33,8 +33,8 @@ public class Parser {
     private static final String INVALID_NOTE_TEXT_MESSAGE =
             "A note cannot contain \" | \".";
     private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, find, mark, unmark, delete, todo, deadline, event, "
-                    + "note, notes, or deletenote.";
+            "Invalid command. Use bye, list, listtasks, listnotes, find, mark, unmark, delete, "
+                    + "todo, deadline, event, note, or deletenote.";
 
     /**
      * Identifies the command represented by the input.
