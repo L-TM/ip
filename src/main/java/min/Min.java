@@ -16,6 +16,8 @@ import min.task.Task;
 
 /** Processes commands and manages Min's task data. */
 public class Min {
+    private static final String CORRUPTED_TASK_DATA_MESSAGE =
+            "Unable to load tasks. Fix or delete data/min.txt. Details: ";
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
     private static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
@@ -41,9 +43,24 @@ public class Min {
      * @throws MinException If the saved task data is invalid.
      */
     public Min() throws IOException, MinException {
+        this(new TaskStorage(), new NoteStorage());
+    }
+
+    /**
+     * Creates Min using the supplied storage and loads its saved tasks and notes.
+     *
+     * @param taskStorage The storage used to load and save task data.
+     * @param noteStorage The storage used to load and save note data.
+     * @throws IOException If the saved data cannot be read.
+     * @throws MinException If the saved task data is invalid.
+     */
+    Min(TaskStorage taskStorage, NoteStorage noteStorage) throws IOException, MinException {
+        assert taskStorage != null : "Task storage must not be null.";
+        assert noteStorage != null : "Note storage must not be null.";
+
         this.parser = new Parser();
-        this.taskStorage = new TaskStorage();
-        this.noteStorage = new NoteStorage();
+        this.taskStorage = taskStorage;
+        this.noteStorage = noteStorage;
         this.tasks = loadTasks(this.taskStorage);
         this.notes = new NoteList(this.noteStorage.load());
     }
@@ -73,18 +90,20 @@ public class Min {
     }
 
     /**
-     * Loads saved tasks and reports incompatible deadline dates.
+     * Loads saved tasks and converts invalid records into user-facing errors.
      *
      * @param storage The storage used to load tasks.
      * @return The loaded tasks.
      * @throws IOException If the saved task data cannot be read.
-     * @throws MinException If a saved deadline date is invalid.
+     * @throws MinException If the saved task data is invalid.
      */
     private static TaskList loadTasks(TaskStorage storage) throws IOException, MinException {
         try {
             return new TaskList(storage.load());
         } catch (DateTimeParseException e) {
             throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            throw new MinException(CORRUPTED_TASK_DATA_MESSAGE + e.getMessage());
         }
     }
 
