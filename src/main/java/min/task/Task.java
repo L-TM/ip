@@ -7,7 +7,18 @@ public abstract class Task {
     private final String description;
     private boolean isDone;
 
+    /**
+     * Creates an incomplete task with the given description.
+     *
+     * @param description The task description. Must not be null, blank, or contain the
+     *                    storage field separator.
+     */
     public Task(String description) {
+        assert description != null && !description.isBlank()
+                : "Task description must not be blank.";
+        assert !description.contains(FILE_FIELD_SEPARATOR)
+                : "Task description must not contain the storage field separator.";
+
         this.description = description;
         this.isDone = false;
     }

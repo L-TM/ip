@@ -13,6 +13,8 @@ import min.ui.gui.MainWindow;
 
 /** Starts Min's JavaFX user interface. */
 public class Main extends Application {
+    private static final String UNEXPECTED_STARTUP_ERROR_MESSAGE =
+            "Min could not start because of an unexpected error.";
 
     @Override
     public void start(Stage stage) {
@@ -35,6 +37,9 @@ public class Main extends Application {
             showStartupError(e.getMessage());
         } catch (IOException e) {
             showStartupError("Unable to start Min.");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            showStartupError(UNEXPECTED_STARTUP_ERROR_MESSAGE);
         }
     }
 

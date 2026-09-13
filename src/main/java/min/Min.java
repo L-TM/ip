@@ -16,6 +16,10 @@ import min.task.Task;
 
 /** Processes commands and manages Min's task data. */
 public class Min {
+    private static final String CORRUPTED_TASK_DATA_MESSAGE =
+            "Unable to load tasks. Fix or delete data/min.txt. Details: ";
+    private static final String CORRUPTED_NOTE_DATA_MESSAGE =
+            "Unable to load notes. Fix or delete data/notes.txt. Details: ";
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
     private static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
@@ -24,6 +28,7 @@ public class Min {
             "Here are the matching tasks in your list:";
     private static final String MATCHING_NOTE_HEADING =
             "Here are the matching notes in your list:";
+    private static final String SAVE_DATA_ERROR_MESSAGE = "Unable to save data.";
     private static final String SECTION_SEPARATOR = "\n\n";
     private static final String WELCOME_MESSAGE =
             "Hello! I'm Min.\nWhat can I do for you?";
@@ -38,14 +43,29 @@ public class Min {
      * Creates Min and loads its saved tasks and notes.
      *
      * @throws IOException If the saved data cannot be read.
-     * @throws MinException If the saved task data is invalid.
+     * @throws MinException If the saved task or note data is invalid.
      */
     public Min() throws IOException, MinException {
+        this(new TaskStorage(), new NoteStorage());
+    }
+
+    /**
+     * Creates Min using the supplied storage and loads its saved tasks and notes.
+     *
+     * @param taskStorage The storage used to load and save task data.
+     * @param noteStorage The storage used to load and save note data.
+     * @throws IOException If the saved data cannot be read.
+     * @throws MinException If the saved task or note data is invalid.
+     */
+    Min(TaskStorage taskStorage, NoteStorage noteStorage) throws IOException, MinException {
+        assert taskStorage != null : "Task storage must not be null.";
+        assert noteStorage != null : "Note storage must not be null.";
+
         this.parser = new Parser();
-        this.taskStorage = new TaskStorage();
-        this.noteStorage = new NoteStorage();
+        this.taskStorage = taskStorage;
+        this.noteStorage = noteStorage;
         this.tasks = loadTasks(this.taskStorage);
-        this.notes = new NoteList(this.noteStorage.load());
+        this.notes = loadNotes(this.noteStorage);
     }
 
     /**
@@ -73,18 +93,36 @@ public class Min {
     }
 
     /**
-     * Loads saved tasks and reports incompatible deadline dates.
+     * Loads saved tasks and converts invalid records into user-facing errors.
      *
      * @param storage The storage used to load tasks.
      * @return The loaded tasks.
      * @throws IOException If the saved task data cannot be read.
-     * @throws MinException If a saved deadline date is invalid.
+     * @throws MinException If the saved task data is invalid.
      */
     private static TaskList loadTasks(TaskStorage storage) throws IOException, MinException {
         try {
             return new TaskList(storage.load());
         } catch (DateTimeParseException e) {
             throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            throw new MinException(CORRUPTED_TASK_DATA_MESSAGE + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads saved notes and converts invalid records into user-facing errors.
+     *
+     * @param storage The storage used to load notes.
+     * @return The loaded notes.
+     * @throws IOException If the saved note data cannot be read.
+     * @throws MinException If the saved note data is invalid.
+     */
+    private static NoteList loadNotes(NoteStorage storage) throws IOException, MinException {
+        try {
+            return new NoteList(storage.load());
+        } catch (IllegalArgumentException e) {
+            throw new MinException(CORRUPTED_NOTE_DATA_MESSAGE + e.getMessage());
         }
     }
 
@@ -131,7 +169,7 @@ public class Min {
         } catch (MinException e) {
             return e.getMessage();
         } catch (IOException e) {
-            return "Unable to save tasks.";
+            return SAVE_DATA_ERROR_MESSAGE;
         }
     }
 

@@ -2,6 +2,7 @@ package min.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
@@ -72,5 +73,22 @@ class TaskTest {
         assertTrue(event.isDone());
         assertEquals("[E][X] meeting (from: 2pm to: 4pm)", event.toString());
         assertEquals("E | 1 | meeting | 2pm | 4pm", event.toFileString());
+    }
+
+    @Test
+    void todo_invalidDescriptions_throwAssertionError() {
+        assertThrows(AssertionError.class, () -> new Todo(null));
+        assertThrows(AssertionError.class, () -> new Todo("   "));
+        assertThrows(AssertionError.class, () -> new Todo("read | book"));
+    }
+
+    @Test
+    void event_invalidTimes_throwAssertionError() {
+        assertThrows(AssertionError.class, () -> new Event("meeting", null, "4pm"));
+        assertThrows(AssertionError.class, () -> new Event("meeting", "   ", "4pm"));
+        assertThrows(AssertionError.class, () -> new Event("meeting", "2 | 3pm", "4pm"));
+        assertThrows(AssertionError.class, () -> new Event("meeting", "2pm", null));
+        assertThrows(AssertionError.class, () -> new Event("meeting", "2pm", "   "));
+        assertThrows(AssertionError.class, () -> new Event("meeting", "2pm", "4 | 5pm"));
     }
 }

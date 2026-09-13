@@ -80,10 +80,92 @@ class TaskStorageTest {
     }
 
     @Test
+    void load_truncatedTodo_throwsIllegalArgumentException() throws IOException {
+        assertDamagedRecord("T | 0");
+    }
+
+    @Test
+    void load_truncatedDeadline_throwsIllegalArgumentException() throws IOException {
+        assertDamagedRecord("D | 0 | submit report");
+    }
+
+    @Test
+    void load_truncatedEvent_throwsIllegalArgumentException() throws IOException {
+        assertDamagedRecord("E | 0 | meeting | 2pm");
+    }
+
+    @Test
+    void load_recordWithExtraField_throwsIllegalArgumentException() throws IOException {
+        assertDamagedRecord("T | 0 | read book | unexpected");
+    }
+
+    @Test
+    void load_invalidStatus_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("T | 2 | read book");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Invalid task status.", exception.getMessage());
+    }
+
+    @Test
+    void load_blankDescription_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("T | 0 | ");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Task description cannot be blank.", exception.getMessage());
+    }
+
+    @Test
+    void load_blankEventStartTime_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("E | 0 | meeting |  | 4pm");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Event times cannot be blank.", exception.getMessage());
+    }
+
+    @Test
+    void load_blankEventEndTime_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("E | 0 | meeting | 2pm | ");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Event times cannot be blank.", exception.getMessage());
+    }
+
+    @Test
     void load_invalidDeadlineDate_throwsDateTimeParseException() throws IOException {
         writeDataFile("D | 0 | submit report | 2026-02-30");
 
         assertThrows(DateTimeParseException.class, storage::load);
+    }
+
+    @Test
+    void load_blankLines_ignoresThemAndPreservesTaskOrder() throws IOException {
+        writeDataFile("T | 0 | read book\n\n  \t \nD | 1 | submit report | 2026-08-28");
+
+        List<Task> loadedTasks = storage.load();
+
+        assertEquals(List.of(
+                "T | 0 | read book",
+                "D | 1 | submit report | 2026-08-28"),
+                loadedTasks.stream().map(Task::toFileString).toList());
+    }
+
+    /** Verifies that loading the given record reports structural damage. */
+    private void assertDamagedRecord(String record) throws IOException {
+        writeDataFile(record);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Damaged task record.", exception.getMessage());
     }
 
     private void writeDataFile(String contents) throws IOException {

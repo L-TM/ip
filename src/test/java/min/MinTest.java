@@ -2,13 +2,17 @@ package min;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import min.command.Parser;
+import min.exception.MinException;
 import min.list.NoteList;
 import min.list.TaskList;
 import min.note.Note;
@@ -21,6 +25,56 @@ class MinTest {
     private final Parser parser = new Parser();
     private final RecordingTaskStorage storage = new RecordingTaskStorage();
     private final RecordingNoteStorage noteStorage = new RecordingNoteStorage();
+
+    @Test
+    void constructor_invalidTaskRecord_throwsMinExceptionNamingTaskFile() {
+        TaskStorage taskStorage = new FailingTaskStorage(
+                new IllegalArgumentException("Invalid task status."));
+
+        MinException exception = assertThrows(MinException.class,
+                () -> new Min(taskStorage, new LoadingNoteStorage(List.of())));
+
+        assertEquals("Unable to load tasks. Fix or delete data/min.txt. Details: "
+                + "Invalid task status.", exception.getMessage());
+    }
+
+    @Test
+    void constructor_invalidDeadlineDate_throwsSpecificMinException() {
+        TaskStorage taskStorage = new FailingTaskStorage(
+                new DateTimeParseException("Invalid date", "2026-02-30", 0));
+
+        MinException exception = assertThrows(MinException.class,
+                () -> new Min(taskStorage, new LoadingNoteStorage(List.of())));
+
+        assertEquals("Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.",
+                exception.getMessage());
+    }
+
+    @Test
+    void constructor_invalidNoteRecord_throwsMinExceptionNamingNoteFile() {
+        NoteStorage noteStorage = new FailingNoteStorage(
+                new IllegalArgumentException("Note text cannot be blank."));
+
+        MinException exception = assertThrows(MinException.class,
+                () -> new Min(new LoadingTaskStorage(List.of()), noteStorage));
+
+        assertEquals("Unable to load notes. Fix or delete data/notes.txt. Details: "
+                + "Note text cannot be blank.", exception.getMessage());
+    }
+
+    @Test
+    void constructor_validStorage_loadsTasksAndNotes() throws IOException, MinException {
+        TaskStorage taskStorage = new LoadingTaskStorage(List.of(new Todo("read book")));
+        NoteStorage noteStorage = new LoadingNoteStorage(List.of(new Note("watch Dune")));
+
+        Min min = new Min(taskStorage, noteStorage);
+
+        assertEquals("Here are the tasks in your list:\n"
+                + " 1.[T][ ] read book\n"
+                + "\n"
+                + "Here are the notes in your list:\n"
+                + " 1.watch Dune", min.getResponse("list"));
+    }
 
     @Test
     void isExitCommand_byeWithSurroundingWhitespace_returnsTrue() {
@@ -57,6 +111,16 @@ class MinTest {
                 + " Now you have 1 tasks in the list.", response);
         assertEquals("T | 0 | read book", tasks.getTasks().get(0).toFileString());
         assertEquals(1, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_todoSaveFails_returnsDataSaveError() {
+        Min min = new Min(parser, new TaskList(List.of()), new SaveFailingTaskStorage(),
+                new NoteList(List.of()), noteStorage);
+
+        String response = min.getResponse("todo read book");
+
+        assertEquals("Unable to save data.", response);
     }
 
     @Test
@@ -206,6 +270,16 @@ class MinTest {
         assertEquals("N | watch Dune", notes.getNotes().get(0).toFileString());
         assertEquals(1, noteStorage.getSaveCount());
         assertEquals(0, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_noteSaveFails_returnsDataSaveError() {
+        Min min = new Min(parser, new TaskList(List.of()), storage,
+                new NoteList(List.of()), new SaveFailingNoteStorage());
+
+        String response = min.getResponse("note watch Dune");
+
+        assertEquals("Unable to save data.", response);
     }
 
     @Test
@@ -372,6 +446,74 @@ class MinTest {
 
         private int getSaveCount() {
             return saveCount;
+        }
+    }
+
+    private static class LoadingTaskStorage extends TaskStorage {
+        private final List<Task> tasks;
+
+        private LoadingTaskStorage(List<Task> tasks) {
+            this.tasks = tasks;
+        }
+
+        @Override
+        public List<Task> load() {
+            return tasks;
+        }
+    }
+
+    private static class LoadingNoteStorage extends NoteStorage {
+        private final List<Note> notes;
+
+        private LoadingNoteStorage(List<Note> notes) {
+            this.notes = notes;
+        }
+
+        @Override
+        public List<Note> load() {
+            return notes;
+        }
+    }
+
+    private static class FailingTaskStorage extends TaskStorage {
+        private final RuntimeException failure;
+
+        private FailingTaskStorage(RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public List<Task> load() {
+            throw failure;
+        }
+    }
+
+    private static class FailingNoteStorage extends NoteStorage {
+        private final RuntimeException failure;
+
+        private FailingNoteStorage(RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public List<Note> load() {
+            throw failure;
+        }
+    }
+
+    private static class SaveFailingTaskStorage extends TaskStorage {
+
+        @Override
+        public void save(List<Task> tasks) throws IOException {
+            throw new IOException("Unable to save test tasks.");
+        }
+    }
+
+    private static class SaveFailingNoteStorage extends NoteStorage {
+
+        @Override
+        public void save(List<Note> notes) throws IOException {
+            throw new IOException("Unable to save test notes.");
         }
     }
 }

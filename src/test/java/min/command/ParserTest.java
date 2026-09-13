@@ -134,6 +134,12 @@ class ParserTest {
     }
 
     @Test
+    void parseTodo_descriptionContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("Task details cannot contain \" | \".",
+                () -> parser.parseTodo("todo read | book"));
+    }
+
+    @Test
     void parseFindKeyword_validInput_returnsKeyword() throws MinException {
         assertEquals("read book", parser.parseFindKeyword("find   read book"));
     }
@@ -176,6 +182,13 @@ class ParserTest {
     }
 
     @Test
+    void parseDeadline_descriptionContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("Task details cannot contain \" | \".",
+                () -> parser.parseDeadline(
+                        "deadline submit | report /by 2026-08-28"));
+    }
+
+    @Test
     void parseEvent_validInput_returnsEvent() throws MinException {
         Event event = parser.parseEvent("event meeting /from 2pm /to 4pm");
 
@@ -198,6 +211,41 @@ class ParserTest {
                 () -> parser.parseEvent("event meeting /from  /to 4pm"));
         assertThrowsMinException(expectedMessage,
                 () -> parser.parseEvent("event meeting /from 2pm /to"));
+    }
+
+    @Test
+    void parseEvent_repeatedFromSeparator_throwsMinException() {
+        assertThrowsMinException(
+                "Invalid event. Use: event <description> /from <time> /to <time>.",
+                () -> parser.parseEvent("event meeting /from 2pm /from 3pm /to 4pm"));
+    }
+
+    @Test
+    void parseEvent_repeatedToSeparator_throwsMinException() {
+        assertThrowsMinException(
+                "Invalid event. Use: event <description> /from <time> /to <time>.",
+                () -> parser.parseEvent("event meeting /from 2pm /to 4pm /to 5pm"));
+    }
+
+    @Test
+    void parseEvent_descriptionContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("Task details cannot contain \" | \".",
+                () -> parser.parseEvent(
+                        "event team | meeting /from 2pm /to 4pm"));
+    }
+
+    @Test
+    void parseEvent_startTimeContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("Task details cannot contain \" | \".",
+                () -> parser.parseEvent(
+                        "event meeting /from Friday | 2pm /to 4pm"));
+    }
+
+    @Test
+    void parseEvent_endTimeContainingFieldSeparator_throwsMinException() {
+        assertThrowsMinException("Task details cannot contain \" | \".",
+                () -> parser.parseEvent(
+                        "event meeting /from 2pm /to Friday | 4pm"));
     }
 
     @Test
