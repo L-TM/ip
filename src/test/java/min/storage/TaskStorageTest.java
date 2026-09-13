@@ -146,6 +146,18 @@ class TaskStorageTest {
         assertThrows(DateTimeParseException.class, storage::load);
     }
 
+    @Test
+    void load_blankLines_ignoresThemAndPreservesTaskOrder() throws IOException {
+        writeDataFile("T | 0 | read book\n\n  \t \nD | 1 | submit report | 2026-08-28");
+
+        List<Task> loadedTasks = storage.load();
+
+        assertEquals(List.of(
+                "T | 0 | read book",
+                "D | 1 | submit report | 2026-08-28"),
+                loadedTasks.stream().map(Task::toFileString).toList());
+    }
+
     /** Verifies that loading the given record reports structural damage. */
     private void assertDamagedRecord(String record) throws IOException {
         writeDataFile(record);

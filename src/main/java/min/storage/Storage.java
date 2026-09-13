@@ -46,6 +46,7 @@ public abstract class Storage<T> {
 
     /**
      * Loads all saved items from the data file.
+     * Blank and whitespace-only lines are ignored.
      *
      * @return A read-only list of loaded items, or an empty list when no data file exists.
      * @throws IOException If the data file cannot be read.
@@ -56,7 +57,8 @@ public abstract class Storage<T> {
         }
 
         return Files.readAllLines(filePath).stream()
-                .map(line -> this.decode(line))
+                .filter(line -> !line.isBlank())
+                .map(this::decode)
                 .toList();
     }
 

@@ -51,6 +51,18 @@ class MinTest {
     }
 
     @Test
+    void constructor_invalidNoteRecord_throwsMinExceptionNamingNoteFile() {
+        NoteStorage noteStorage = new FailingNoteStorage(
+                new IllegalArgumentException("Note text cannot be blank."));
+
+        MinException exception = assertThrows(MinException.class,
+                () -> new Min(new LoadingTaskStorage(List.of()), noteStorage));
+
+        assertEquals("Unable to load notes. Fix or delete data/notes.txt. Details: "
+                + "Note text cannot be blank.", exception.getMessage());
+    }
+
+    @Test
     void constructor_validStorage_loadsTasksAndNotes() throws IOException, MinException {
         TaskStorage taskStorage = new LoadingTaskStorage(List.of(new Todo("read book")));
         NoteStorage noteStorage = new LoadingNoteStorage(List.of(new Note("watch Dune")));
@@ -452,6 +464,19 @@ class MinTest {
 
         @Override
         public List<Task> load() {
+            throw failure;
+        }
+    }
+
+    private static class FailingNoteStorage extends NoteStorage {
+        private final RuntimeException failure;
+
+        private FailingNoteStorage(RuntimeException failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public List<Note> load() {
             throw failure;
         }
     }

@@ -18,6 +18,8 @@ import min.task.Task;
 public class Min {
     private static final String CORRUPTED_TASK_DATA_MESSAGE =
             "Unable to load tasks. Fix or delete data/min.txt. Details: ";
+    private static final String CORRUPTED_NOTE_DATA_MESSAGE =
+            "Unable to load notes. Fix or delete data/notes.txt. Details: ";
     private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
             "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
     private static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
@@ -40,7 +42,7 @@ public class Min {
      * Creates Min and loads its saved tasks and notes.
      *
      * @throws IOException If the saved data cannot be read.
-     * @throws MinException If the saved task data is invalid.
+     * @throws MinException If the saved task or note data is invalid.
      */
     public Min() throws IOException, MinException {
         this(new TaskStorage(), new NoteStorage());
@@ -52,7 +54,7 @@ public class Min {
      * @param taskStorage The storage used to load and save task data.
      * @param noteStorage The storage used to load and save note data.
      * @throws IOException If the saved data cannot be read.
-     * @throws MinException If the saved task data is invalid.
+     * @throws MinException If the saved task or note data is invalid.
      */
     Min(TaskStorage taskStorage, NoteStorage noteStorage) throws IOException, MinException {
         assert taskStorage != null : "Task storage must not be null.";
@@ -62,7 +64,7 @@ public class Min {
         this.taskStorage = taskStorage;
         this.noteStorage = noteStorage;
         this.tasks = loadTasks(this.taskStorage);
-        this.notes = new NoteList(this.noteStorage.load());
+        this.notes = loadNotes(this.noteStorage);
     }
 
     /**
@@ -104,6 +106,22 @@ public class Min {
             throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
         } catch (IllegalArgumentException e) {
             throw new MinException(CORRUPTED_TASK_DATA_MESSAGE + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads saved notes and converts invalid records into user-facing errors.
+     *
+     * @param storage The storage used to load notes.
+     * @return The loaded notes.
+     * @throws IOException If the saved note data cannot be read.
+     * @throws MinException If the saved note data is invalid.
+     */
+    private static NoteList loadNotes(NoteStorage storage) throws IOException, MinException {
+        try {
+            return new NoteList(storage.load());
+        } catch (IllegalArgumentException e) {
+            throw new MinException(CORRUPTED_NOTE_DATA_MESSAGE + e.getMessage());
         }
     }
 

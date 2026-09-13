@@ -73,7 +73,40 @@ class NoteStorageTest {
     void load_missingTextField_throwsIllegalArgumentException() throws IOException {
         writeDataFile("N");
 
-        assertThrows(IllegalArgumentException.class, storage::load);
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Damaged note record.", exception.getMessage());
+    }
+
+    @Test
+    void load_blankText_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("N |    ");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Note text cannot be blank.", exception.getMessage());
+    }
+
+    @Test
+    void load_extraField_throwsIllegalArgumentException() throws IOException {
+        writeDataFile("N | watch | Dune");
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, storage::load);
+
+        assertEquals("Damaged note record.", exception.getMessage());
+    }
+
+    @Test
+    void load_blankLines_ignoresThemAndPreservesNoteOrder() throws IOException {
+        writeDataFile("N | watch Dune\n\n   \nN | read chapter 4");
+
+        List<Note> loadedNotes = storage.load();
+
+        assertEquals(List.of("watch Dune", "read chapter 4"),
+                loadedNotes.stream().map(Note::getText).toList());
     }
 
     private void writeDataFile(String contents) throws IOException {
