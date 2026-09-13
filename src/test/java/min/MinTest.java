@@ -114,6 +114,16 @@ class MinTest {
     }
 
     @Test
+    void getResponse_todoSaveFails_returnsDataSaveError() {
+        Min min = new Min(parser, new TaskList(List.of()), new SaveFailingTaskStorage(),
+                new NoteList(List.of()), noteStorage);
+
+        String response = min.getResponse("todo read book");
+
+        assertEquals("Unable to save data.", response);
+    }
+
+    @Test
     void getResponse_deadline_addsTaskAndReturnsConfirmation() {
         TaskList tasks = new TaskList(List.of());
         Min min = createMin(tasks);
@@ -260,6 +270,16 @@ class MinTest {
         assertEquals("N | watch Dune", notes.getNotes().get(0).toFileString());
         assertEquals(1, noteStorage.getSaveCount());
         assertEquals(0, storage.getSaveCount());
+    }
+
+    @Test
+    void getResponse_noteSaveFails_returnsDataSaveError() {
+        Min min = new Min(parser, new TaskList(List.of()), storage,
+                new NoteList(List.of()), new SaveFailingNoteStorage());
+
+        String response = min.getResponse("note watch Dune");
+
+        assertEquals("Unable to save data.", response);
     }
 
     @Test
@@ -478,6 +498,22 @@ class MinTest {
         @Override
         public List<Note> load() {
             throw failure;
+        }
+    }
+
+    private static class SaveFailingTaskStorage extends TaskStorage {
+
+        @Override
+        public void save(List<Task> tasks) throws IOException {
+            throw new IOException("Unable to save test tasks.");
+        }
+    }
+
+    private static class SaveFailingNoteStorage extends NoteStorage {
+
+        @Override
+        public void save(List<Note> notes) throws IOException {
+            throw new IOException("Unable to save test notes.");
         }
     }
 }

@@ -7,6 +7,7 @@ import min.exception.MinException;
 
 /** Starts the command-line version of Min. */
 public class CliLauncher {
+    private static final String LOAD_DATA_ERROR_MESSAGE = "Unable to load saved data.";
 
     /**
      * Starts Min using standard input and output.
@@ -23,7 +24,7 @@ public class CliLauncher {
             ui.showError(e.getMessage());
             return;
         } catch (IOException e) {
-            ui.showError("Unable to load tasks.");
+            ui.showError(LOAD_DATA_ERROR_MESSAGE);
             return;
         }
 

@@ -28,6 +28,7 @@ public class Min {
             "Here are the matching tasks in your list:";
     private static final String MATCHING_NOTE_HEADING =
             "Here are the matching notes in your list:";
+    private static final String SAVE_DATA_ERROR_MESSAGE = "Unable to save data.";
     private static final String SECTION_SEPARATOR = "\n\n";
     private static final String WELCOME_MESSAGE =
             "Hello! I'm Min.\nWhat can I do for you?";
@@ -168,7 +169,7 @@ public class Min {
         } catch (MinException e) {
             return e.getMessage();
         } catch (IOException e) {
-            return "Unable to save tasks.";
+            return SAVE_DATA_ERROR_MESSAGE;
         }
     }
 
