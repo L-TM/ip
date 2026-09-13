@@ -32,6 +32,8 @@ public class Parser {
             "A note needs some text. Use: note <text>.";
     private static final String INVALID_NOTE_TEXT_MESSAGE =
             "A note cannot contain \" | \".";
+    private static final String INVALID_TASK_TEXT_MESSAGE =
+            "Task details cannot contain \" | \".";
     private static final String INVALID_COMMAND_MESSAGE =
             "Invalid command. Use bye, list, listtasks, listnotes, find, mark, unmark, delete, "
                     + "todo, deadline, event, note, or deletenote.";
@@ -124,13 +126,6 @@ public class Parser {
     }
 
     /**
-     * Creates a todo task from the input.
-     *
-     * @param input The command entered by the user.
-     * @return The created todo task.
-     * @throws MinException If the todo description is missing.
-     */
-    /**
      * Creates a note from the input.
      *
      * @param input The command entered by the user.
@@ -148,11 +143,19 @@ public class Parser {
         return new Note(text);
     }
 
+    /**
+     * Creates a todo task from the input.
+     *
+     * @param input The command entered by the user.
+     * @return The created todo task.
+     * @throws MinException If the todo description is missing or contains the storage field separator.
+     */
     public Todo parseTodo(String input) throws MinException {
         String description = extractArguments(input, Command.TODO);
         if (description.isEmpty()) {
             throw new MinException(INVALID_TODO_MESSAGE);
         }
+        validateTaskText(description);
         return new Todo(description);
     }
 
@@ -190,6 +193,7 @@ public class Parser {
         if (description.isEmpty() || byText.isEmpty()) {
             throw new MinException(INVALID_DEADLINE_MESSAGE);
         }
+        validateTaskText(description);
         return new Deadline(description, parseDeadlineDate(byText));
     }
 
@@ -219,7 +223,22 @@ public class Parser {
         if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new MinException(INVALID_EVENT_MESSAGE);
         }
+        validateTaskText(description);
+        validateTaskText(from);
+        validateTaskText(to);
         return new Event(description, from, to);
+    }
+
+    /**
+     * Rejects text that would make a saved task record ambiguous.
+     *
+     * @param text The text to check.
+     * @throws MinException If the text contains the storage field separator.
+     */
+    private static void validateTaskText(String text) throws MinException {
+        if (text.contains(FILE_FIELD_SEPARATOR)) {
+            throw new MinException(INVALID_TASK_TEXT_MESSAGE);
+        }
     }
 
     private String extractArguments(String input, Command command) {
