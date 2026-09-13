@@ -207,19 +207,19 @@ public class Parser {
     public Event parseEvent(String input) throws MinException {
         String eventDetails = extractArguments(input, Command.EVENT);
         int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
-        if (fromIndex == -1) {
+        if (fromIndex == -1 || fromIndex != eventDetails.lastIndexOf(FROM_SEPARATOR)) {
+            throw new MinException(INVALID_EVENT_MESSAGE);
+        }
+
+        int toIndex = eventDetails.indexOf(TO_SEPARATOR);
+        if (toIndex == -1 || toIndex != eventDetails.lastIndexOf(TO_SEPARATOR)
+                || toIndex < fromIndex) {
             throw new MinException(INVALID_EVENT_MESSAGE);
         }
 
         String description = eventDetails.substring(0, fromIndex).trim();
-        String eventTimes = eventDetails.substring(fromIndex + FROM_SEPARATOR.length());
-        int toIndex = eventTimes.indexOf(TO_SEPARATOR);
-        if (toIndex == -1) {
-            throw new MinException(INVALID_EVENT_MESSAGE);
-        }
-
-        String from = eventTimes.substring(0, toIndex).trim();
-        String to = eventTimes.substring(toIndex + TO_SEPARATOR.length()).trim();
+        String from = eventDetails.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
+        String to = eventDetails.substring(toIndex + TO_SEPARATOR.length()).trim();
         if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new MinException(INVALID_EVENT_MESSAGE);
         }

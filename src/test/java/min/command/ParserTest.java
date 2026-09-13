@@ -214,6 +214,20 @@ class ParserTest {
     }
 
     @Test
+    void parseEvent_repeatedFromSeparator_throwsMinException() {
+        assertThrowsMinException(
+                "Invalid event. Use: event <description> /from <time> /to <time>.",
+                () -> parser.parseEvent("event meeting /from 2pm /from 3pm /to 4pm"));
+    }
+
+    @Test
+    void parseEvent_repeatedToSeparator_throwsMinException() {
+        assertThrowsMinException(
+                "Invalid event. Use: event <description> /from <time> /to <time>.",
+                () -> parser.parseEvent("event meeting /from 2pm /to 4pm /to 5pm"));
+    }
+
+    @Test
     void parseEvent_descriptionContainingFieldSeparator_throwsMinException() {
         assertThrowsMinException("Task details cannot contain \" | \".",
                 () -> parser.parseEvent(
