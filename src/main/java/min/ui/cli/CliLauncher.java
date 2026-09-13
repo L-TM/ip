@@ -8,6 +8,8 @@ import min.exception.MinException;
 /** Starts the command-line version of Min. */
 public class CliLauncher {
     private static final String LOAD_DATA_ERROR_MESSAGE = "Unable to load saved data.";
+    private static final String UNEXPECTED_STARTUP_ERROR_MESSAGE =
+            "Min could not start because of an unexpected error.";
 
     /**
      * Starts Min using standard input and output.
@@ -25,6 +27,10 @@ public class CliLauncher {
             return;
         } catch (IOException e) {
             ui.showError(LOAD_DATA_ERROR_MESSAGE);
+            return;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            ui.showError(UNEXPECTED_STARTUP_ERROR_MESSAGE);
             return;
         }
 
