@@ -158,13 +158,18 @@ public class Min {
     }
 
     /**
-     * Formats items as a numbered list.
+     * Formats items as a numbered list, or reports that there is nothing to show.
      *
      * @param heading The heading shown before the items.
      * @param displayedItems The items to include.
+     * @param emptyMessage The message shown when there are no items to list.
      * @return The formatted item list.
      */
-    private String formatItemList(String heading, List<?> displayedItems) {
+    private String formatItemList(String heading, List<?> displayedItems, String emptyMessage) {
+        if (displayedItems.isEmpty()) {
+            return emptyMessage;
+        }
+
         StringBuilder response = new StringBuilder(heading);
 
         for (int i = 0; i < displayedItems.size(); i++) {
@@ -187,16 +192,20 @@ public class Min {
     private String findItems(String input) throws MinException {
         String keyword = this.parser.parseFindKeyword(input);
 
-        return formatItemList(Messages.MATCHING_TASK_HEADING, this.tasks.showMatchingTasks(keyword))
+        return formatItemList(Messages.MATCHING_TASK_HEADING,
+                        this.tasks.showMatchingTasks(keyword), Messages.EMPTY_MATCHING_TASKS)
                 + SECTION_SEPARATOR
-                + formatItemList(Messages.MATCHING_NOTE_HEADING, this.notes.showMatchingNotes(keyword));
+                + formatItemList(Messages.MATCHING_NOTE_HEADING,
+                        this.notes.showMatchingNotes(keyword), Messages.EMPTY_MATCHING_NOTES);
     }
 
     /** Returns every task followed by every note, each as a numbered list. */
     private String listAllItems() {
-        return formatItemList(Messages.TASK_LIST_HEADING, this.tasks.showAllTasks())
+        return formatItemList(Messages.TASK_LIST_HEADING,
+                        this.tasks.showAllTasks(), Messages.EMPTY_TASK_LIST)
                 + SECTION_SEPARATOR
-                + formatItemList(Messages.NOTE_LIST_HEADING, this.notes.showAllNotes());
+                + formatItemList(Messages.NOTE_LIST_HEADING,
+                        this.notes.showAllNotes(), Messages.EMPTY_NOTE_LIST);
     }
 
     /**
@@ -299,9 +308,11 @@ public class Min {
             case LIST:
                 return listAllItems();
             case LISTTASKS:
-                return formatItemList(Messages.TASK_LIST_HEADING, this.tasks.showAllTasks());
+                return formatItemList(Messages.TASK_LIST_HEADING,
+                        this.tasks.showAllTasks(), Messages.EMPTY_TASK_LIST);
             case LISTNOTES:
-                return formatItemList(Messages.NOTE_LIST_HEADING, this.notes.showAllNotes());
+                return formatItemList(Messages.NOTE_LIST_HEADING,
+                        this.notes.showAllNotes(), Messages.EMPTY_NOTE_LIST);
             case FIND:
                 return findItems(input);
             case MARK:

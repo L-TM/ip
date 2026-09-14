@@ -8,47 +8,59 @@ package min.ui;
  * Messages that embed a task, a note, or a count are built by the methods below; the rest
  * are plain constants.
  *
+ * <p>Min's voice is relaxed and lightly funny, but errors stay helpful first and funny
+ * second: every error below still tells the user exactly what to type.
+ *
  * <p>Item text is passed in as an already-formatted {@code String} so that this class does
  * not depend on the task and note packages.
  */
 public final class Messages {
     // Greeting and farewell.
-    public static final String WELCOME = "Hello! I'm Min.\nWhat can I do for you?";
-    public static final String GOODBYE = " Bye. Hope to see you again soon!";
+    public static final String WELCOME = "Hi, I'm Min.\nTasks, notes, whatever - I got you.";
+    public static final String GOODBYE = "Later! Go touch some grass.";
 
     // Headings shown above a numbered list of items.
-    public static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
-    public static final String NOTE_LIST_HEADING = "Here are the notes in your list:";
-    public static final String MATCHING_TASK_HEADING = "Here are the matching tasks in your list:";
-    public static final String MATCHING_NOTE_HEADING = "Here are the matching notes in your list:";
+    public static final String TASK_LIST_HEADING = "Your tasks, in all their glory:";
+    public static final String NOTE_LIST_HEADING = "And the notes you jotted down:";
+    public static final String MATCHING_TASK_HEADING = "Tasks that match:";
+    public static final String MATCHING_NOTE_HEADING = "Notes that match:";
+
+    // Shown in place of a heading when a list has nothing to show.
+    public static final String EMPTY_TASK_LIST = "No tasks. Great!";
+    public static final String EMPTY_NOTE_LIST = "No notes. A blank canvas.";
+    public static final String EMPTY_MATCHING_TASKS = "No tasks match that.";
+    public static final String EMPTY_MATCHING_NOTES = "No notes match that either.";
 
     // Errors caused by invalid command input.
     public static final String INVALID_COMMAND =
-            "Invalid command. Use bye, list, listtasks, listnotes, find, mark, unmark, delete, "
-                    + "todo, deadline, event, note, or deletenote.";
-    public static final String INVALID_TODO = "A todo needs a description. Use: todo <description>.";
+            "Hmm, don't know that one. I speak: bye, list, listtasks, listnotes, find, mark, "
+                    + "unmark, delete, todo, deadline, event, note, deletenote.";
+    public static final String INVALID_TODO = "A todo needs words. Try: todo <description>.";
     public static final String INVALID_DEADLINE =
-            "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
-    public static final String INVALID_DEADLINE_DATE = "Invalid deadline date. Use yyyy-mm-dd.";
+            "That deadline's missing something. Try: deadline <description> /by yyyy-mm-dd.";
+    public static final String INVALID_DEADLINE_DATE = "That date's not clicking. Use yyyy-mm-dd.";
     public static final String INVALID_EVENT =
-            "Invalid event. Use: event <description> /from <time> /to <time>.";
-    public static final String INVALID_FIND = "Please provide a keyword to find.";
-    public static final String INVALID_NOTE = "A note needs some text. Use: note <text>.";
-    public static final String INVALID_NOTE_TEXT = "A note cannot contain \" | \".";
-    public static final String INVALID_TASK_TEXT = "Task details cannot contain \" | \".";
+            "Events need a start and an end. Try: event <description> /from <time> /to <time>.";
+    public static final String INVALID_FIND = "Find what, exactly? Give me a keyword.";
+    public static final String INVALID_NOTE = "An empty note is just paper. Try: note <text>.";
+    public static final String INVALID_NOTE_TEXT =
+            "No \" | \" in notes, sorry - that's my filing system.";
+    public static final String INVALID_TASK_TEXT =
+            "No \" | \" in task details - that's my filing system.";
 
     // Errors caused by unreadable or unwritable saved data.
-    public static final String SAVE_DATA_ERROR = "Unable to save data.";
-    public static final String LOAD_DATA_ERROR = "Unable to load saved data.";
+    public static final String SAVE_DATA_ERROR =
+            "Couldn't save that. My disk and I aren't on speaking terms right now.";
+    public static final String LOAD_DATA_ERROR = "Couldn't open your saved data.";
     public static final String INVALID_SAVED_DEADLINE_DATE =
-            "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
+            "Saved deadline dates need to be yyyy-mm-dd. Fix data/min.txt.";
 
     // Text shown when Min cannot start.
     public static final String APP_NAME = "Min";
-    public static final String STARTUP_ERROR_HEADER = "Unable to start Min";
-    public static final String STARTUP_ERROR = "Unable to start Min.";
+    public static final String STARTUP_ERROR_HEADER = "Min's having a moment";
+    public static final String STARTUP_ERROR = "Min couldn't open your saved data.";
     public static final String UNEXPECTED_STARTUP_ERROR =
-            "Min could not start because of an unexpected error.";
+            "Min tripped over something unexpected and couldn't start.";
 
     /** Prevents instantiation of this constants holder. */
     private Messages() {
@@ -61,9 +73,10 @@ public final class Messages {
      * @param taskCount The number of tasks now in the list.
      */
     public static String addedTask(String taskText, int taskCount) {
-        return " Got it. I've added this task:\n"
+        return "Bet. Added to the pile:\n"
                 + "   " + taskText + "\n"
-                + " Now you have " + taskCount + " tasks in the list.";
+                + "That's " + plural(taskCount, "task")
+                + " now. No pressure. (Okay, maybe a little pressure.)";
     }
 
     /**
@@ -73,9 +86,9 @@ public final class Messages {
      * @param noteCount The number of notes now in the list.
      */
     public static String addedNote(String noteText, int noteCount) {
-        return " Got it. I've added this note:\n"
+        return "Cool, wrote it down:\n"
                 + "   " + noteText + "\n"
-                + " Now you have " + noteCount + " notes in the list.";
+                + "That's " + plural(noteCount, "note") + ". Your brain thanks you.";
     }
 
     /**
@@ -84,7 +97,7 @@ public final class Messages {
      * @param taskText The marked task as it is displayed.
      */
     public static String markedTask(String taskText) {
-        return "Nice! I've marked this task as done:\n"
+        return "W. Nice, one down:\n"
                 + "   " + taskText;
     }
 
@@ -94,7 +107,7 @@ public final class Messages {
      * @param taskText The unmarked task as it is displayed.
      */
     public static String unmarkedTask(String taskText) {
-        return "OK, I've marked this task as not done yet:\n"
+        return "Back on the pile it goes. Happens:\n"
                 + "   " + taskText;
     }
 
@@ -105,9 +118,9 @@ public final class Messages {
      * @param taskCount The number of tasks left in the list.
      */
     public static String removedTask(String taskText, int taskCount) {
-        return " Got it. I've removed this task:\n"
+        return "Poof. Gone:\n"
                 + "   " + taskText + "\n"
-                + " Now you have " + taskCount + " tasks in the list.";
+                + plural(taskCount, "task") + " left. Lighter already.";
     }
 
     /**
@@ -117,9 +130,9 @@ public final class Messages {
      * @param noteCount The number of notes left in the list.
      */
     public static String removedNote(String noteText, int noteCount) {
-        return " Got it. I've removed this note:\n"
+        return "Tossed it:\n"
                 + "   " + noteText + "\n"
-                + " Now you have " + noteCount + " notes in the list.";
+                + plural(noteCount, "note") + " left.";
     }
 
     /**
@@ -128,7 +141,7 @@ public final class Messages {
      * @param details The reason the saved data was rejected.
      */
     public static String corruptedTaskData(String details) {
-        return "Unable to load tasks. Fix or delete data/min.txt. Details: " + details;
+        return "Your saved tasks look scrambled. Fix or delete data/min.txt. Details: " + details;
     }
 
     /**
@@ -137,7 +150,7 @@ public final class Messages {
      * @param details The reason the saved data was rejected.
      */
     public static String corruptedNoteData(String details) {
-        return "Unable to load notes. Fix or delete data/notes.txt. Details: " + details;
+        return "Your saved notes look scrambled. Fix or delete data/notes.txt. Details: " + details;
     }
 
     /**
@@ -147,7 +160,7 @@ public final class Messages {
      * @param action The action the number was needed for, such as "mark".
      */
     public static String missingIndex(String itemName, String action) {
-        return "Please provide a " + itemName + " number to " + action + ".";
+        return "Which " + itemName + "? Give me a number to " + action + ".";
     }
 
     /**
@@ -157,7 +170,7 @@ public final class Messages {
      * @param action The action that could not be performed, such as "mark".
      */
     public static String noItems(String itemName, String action) {
-        return "There are no " + itemName + "s to " + action + ".";
+        return "No " + itemName + "s to " + action + ". Nothing to do here.";
     }
 
     /**
@@ -167,7 +180,7 @@ public final class Messages {
      * @param itemCount The number of items the number may refer to.
      */
     public static String indexOutOfRange(String itemName, int itemCount) {
-        return capitalize(itemName) + " number must be between 1 and " + itemCount + ".";
+        return "Pick a " + itemName + " number between 1 and " + itemCount + ".";
     }
 
     /**
@@ -176,13 +189,16 @@ public final class Messages {
      * @param itemName The singular name of the item, such as "task".
      */
     public static String indexNotANumber(String itemName) {
-        return "The " + itemName + " number must be a whole number.";
+        return "That " + itemName + " number needs to be a whole number. I'm not that clever.";
     }
 
-    /** Returns the word with its first letter in upper case. */
-    private static String capitalize(String word) {
-        assert !word.isEmpty() : "Word to capitalize must not be empty.";
-
-        return Character.toUpperCase(word.charAt(0)) + word.substring(1);
+    /**
+     * Returns the count followed by the singular or plural form of the word.
+     *
+     * @param count The number of items.
+     * @param singular The singular form of the item name, such as "task".
+     */
+    private static String plural(int count, String singular) {
+        return count + " " + singular + (count == 1 ? "" : "s");
     }
 }
