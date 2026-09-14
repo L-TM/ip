@@ -303,6 +303,8 @@ public class Min {
         assert command != null : "Parser must return a command or throw an exception.";
 
         switch (command) {
+            case HELP:
+                return Messages.HELP;
             case BYE:
                 return Messages.GOODBYE;
             case LIST:

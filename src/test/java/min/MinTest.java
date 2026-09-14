@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import min.command.Command;
 import min.command.Parser;
 import min.exception.MinException;
 import min.list.NoteList;
@@ -97,6 +98,21 @@ class MinTest {
         Min min = createMin(new TaskList(List.of()));
 
         assertEquals(Messages.GOODBYE, min.getResponse("bye"));
+    }
+
+    @Test
+    void getResponse_help_returnsHelpMessage() {
+        Min min = createMin(new TaskList(List.of()));
+
+        assertEquals(Messages.HELP, min.getResponse("help"));
+    }
+
+    @Test
+    void help_everyCommandWord_isDocumented() {
+        for (Command command : Command.values()) {
+            assertTrue(Messages.HELP.contains(command.getWord()),
+                    "Help text does not mention the " + command.getWord() + " command.");
+        }
     }
 
     @Test

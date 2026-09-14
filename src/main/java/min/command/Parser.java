@@ -30,7 +30,8 @@ public class Parser {
         return Arrays.stream(Command.values())
                 .filter(command -> command.matches(input))
                 .findFirst()
-                .orElseThrow(() -> new MinException(Messages.INVALID_COMMAND));
+                .orElseThrow(() -> new MinException(
+                        Messages.invalidCommand(Command.getAllWords())));
     }
 
     /**

@@ -51,7 +51,7 @@ class ParserTest {
 
     @Test
     void parseCommand_invalidCommands_throwsMinException() {
-        String expectedMessage = Messages.INVALID_COMMAND;
+        String expectedMessage = Messages.invalidCommand(Command.getAllWords());
 
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand(""));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("dance"));
@@ -59,6 +59,7 @@ class ParserTest {
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("list now"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("listnotes now"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("notes"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("help me"));
     }
 
     @Test

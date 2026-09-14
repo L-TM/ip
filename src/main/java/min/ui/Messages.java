@@ -16,8 +16,21 @@ package min.ui;
  */
 public final class Messages {
     // Greeting and farewell.
-    public static final String WELCOME = "Hi, I'm Min.\nTasks, notes, whatever - I got you.";
+    public static final String WELCOME = "Hi, I'm Min.\nTasks, notes, whatever - I got you."
+            + "\nNew here? Try 'help'.";
     public static final String GOODBYE = "Later! Go touch some grass.";
+    public static final String INPUT_PROMPT = "Type a command, or 'help'";
+    public static final String HELP = "Here's what I know:\n"
+            + "   todo <description>\n"
+            + "   deadline <description> /by yyyy-mm-dd\n"
+            + "   event <description> /from <time> /to <time>\n"
+            + "   note <text>\n"
+            + "   list, listtasks, listnotes\n"
+            + "   find <keyword>\n"
+            + "   mark <number>, unmark <number>, delete <number>\n"
+            + "   deletenote <number>\n"
+            + "   help, bye\n"
+            + "Numbers match the last list you printed.";
 
     // Headings shown above a numbered list of items.
     public static final String TASK_LIST_HEADING = "Your tasks, in all their glory:";
@@ -32,9 +45,6 @@ public final class Messages {
     public static final String EMPTY_MATCHING_NOTES = "No notes match that either.";
 
     // Errors caused by invalid command input.
-    public static final String INVALID_COMMAND =
-            "Hmm, don't know that one. I speak: bye, list, listtasks, listnotes, find, mark, "
-                    + "unmark, delete, todo, deadline, event, note, deletenote.";
     public static final String INVALID_TODO = "A todo needs words. Try: todo <description>.";
     public static final String INVALID_DEADLINE =
             "That deadline's missing something. Try: deadline <description> /by yyyy-mm-dd.";
@@ -64,6 +74,15 @@ public final class Messages {
 
     /** Prevents instantiation of this constants holder. */
     private Messages() {
+    }
+
+    /**
+     * Returns the error shown when the input is not a command Min knows.
+     *
+     * @param commandWords Every command word Min accepts, separated by commas.
+     */
+    public static String invalidCommand(String commandWords) {
+        return "Hmm, don't know that one. I speak: " + commandWords + ".";
     }
 
     /**
