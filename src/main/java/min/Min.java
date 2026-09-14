@@ -13,25 +13,11 @@ import min.note.Note;
 import min.storage.NoteStorage;
 import min.storage.TaskStorage;
 import min.task.Task;
+import min.ui.Messages;
 
 /** Processes commands and manages Min's task data. */
 public class Min {
-    private static final String CORRUPTED_TASK_DATA_MESSAGE =
-            "Unable to load tasks. Fix or delete data/min.txt. Details: ";
-    private static final String CORRUPTED_NOTE_DATA_MESSAGE =
-            "Unable to load notes. Fix or delete data/notes.txt. Details: ";
-    private static final String INVALID_SAVED_DEADLINE_DATE_MESSAGE =
-            "Unable to load tasks. Saved deadline dates must use yyyy-mm-dd.";
-    private static final String TASK_LIST_HEADING = "Here are the tasks in your list:";
-    private static final String NOTE_LIST_HEADING = "Here are the notes in your list:";
-    private static final String MATCHING_TASK_HEADING =
-            "Here are the matching tasks in your list:";
-    private static final String MATCHING_NOTE_HEADING =
-            "Here are the matching notes in your list:";
-    private static final String SAVE_DATA_ERROR_MESSAGE = "Unable to save data.";
     private static final String SECTION_SEPARATOR = "\n\n";
-    private static final String WELCOME_MESSAGE =
-            "Hello! I'm Min.\nWhat can I do for you?";
 
     private final Parser parser;
     private final TaskStorage taskStorage;
@@ -104,9 +90,9 @@ public class Min {
         try {
             return new TaskList(storage.load());
         } catch (DateTimeParseException e) {
-            throw new MinException(INVALID_SAVED_DEADLINE_DATE_MESSAGE);
+            throw new MinException(Messages.INVALID_SAVED_DEADLINE_DATE);
         } catch (IllegalArgumentException e) {
-            throw new MinException(CORRUPTED_TASK_DATA_MESSAGE + e.getMessage());
+            throw new MinException(Messages.corruptedTaskData(e.getMessage()));
         }
     }
 
@@ -122,7 +108,7 @@ public class Min {
         try {
             return new NoteList(storage.load());
         } catch (IllegalArgumentException e) {
-            throw new MinException(CORRUPTED_NOTE_DATA_MESSAGE + e.getMessage());
+            throw new MinException(Messages.corruptedNoteData(e.getMessage()));
         }
     }
 
@@ -137,14 +123,12 @@ public class Min {
         this.tasks.addTask(task);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return " Got it. I've added this task:\n"
-                + "   " + task + "\n"
-                + " Now you have " + this.tasks.size() + " tasks in the list.";
+        return Messages.addedTask(task.toString(), this.tasks.size());
     }
 
     /** Returns Min's welcome message. */
     public String getWelcomeMessage() {
-        return WELCOME_MESSAGE;
+        return Messages.WELCOME;
     }
 
     /**
@@ -169,7 +153,7 @@ public class Min {
         } catch (MinException e) {
             return e.getMessage();
         } catch (IOException e) {
-            return SAVE_DATA_ERROR_MESSAGE;
+            return Messages.SAVE_DATA_ERROR;
         }
     }
 
@@ -203,16 +187,16 @@ public class Min {
     private String findItems(String input) throws MinException {
         String keyword = this.parser.parseFindKeyword(input);
 
-        return formatItemList(MATCHING_TASK_HEADING, this.tasks.showMatchingTasks(keyword))
+        return formatItemList(Messages.MATCHING_TASK_HEADING, this.tasks.showMatchingTasks(keyword))
                 + SECTION_SEPARATOR
-                + formatItemList(MATCHING_NOTE_HEADING, this.notes.showMatchingNotes(keyword));
+                + formatItemList(Messages.MATCHING_NOTE_HEADING, this.notes.showMatchingNotes(keyword));
     }
 
     /** Returns every task followed by every note, each as a numbered list. */
     private String listAllItems() {
-        return formatItemList(TASK_LIST_HEADING, this.tasks.showAllTasks())
+        return formatItemList(Messages.TASK_LIST_HEADING, this.tasks.showAllTasks())
                 + SECTION_SEPARATOR
-                + formatItemList(NOTE_LIST_HEADING, this.notes.showAllNotes());
+                + formatItemList(Messages.NOTE_LIST_HEADING, this.notes.showAllNotes());
     }
 
     /**
@@ -226,9 +210,7 @@ public class Min {
         this.notes.addNote(note);
         this.noteStorage.save(this.notes.getNotes());
 
-        return " Got it. I've added this note:\n"
-                + "   " + note + "\n"
-                + " Now you have " + this.notes.size() + " notes in the list.";
+        return Messages.addedNote(note.toString(), this.notes.size());
     }
 
     /**
@@ -244,9 +226,7 @@ public class Min {
         Note deletedNote = this.notes.deleteNote(noteIndex);
         this.noteStorage.save(this.notes.getNotes());
 
-        return " Got it. I've removed this note:\n"
-                + "   " + deletedNote + "\n"
-                + " Now you have " + this.notes.size() + " notes in the list.";
+        return Messages.removedNote(deletedNote.toString(), this.notes.size());
     }
 
     /**
@@ -263,8 +243,7 @@ public class Min {
         Task markedTask = this.tasks.markTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return "Nice! I've marked this task as done:\n"
-                + "   " + markedTask;
+        return Messages.markedTask(markedTask.toString());
     }
 
     /**
@@ -281,8 +260,7 @@ public class Min {
         Task unmarkedTask = this.tasks.unmarkTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return "OK, I've marked this task as not done yet:\n"
-                + "   " + unmarkedTask;
+        return Messages.unmarkedTask(unmarkedTask.toString());
     }
 
     /**
@@ -299,9 +277,7 @@ public class Min {
         Task deletedTask = this.tasks.deleteTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return " Got it. I've removed this task:\n"
-                + "   " + deletedTask + "\n"
-                + " Now you have " + this.tasks.size() + " tasks in the list.";
+        return Messages.removedTask(deletedTask.toString(), this.tasks.size());
     }
 
     /**
@@ -319,13 +295,13 @@ public class Min {
 
         switch (command) {
             case BYE:
-                return " Bye. Hope to see you again soon!";
+                return Messages.GOODBYE;
             case LIST:
                 return listAllItems();
             case LISTTASKS:
-                return formatItemList(TASK_LIST_HEADING, this.tasks.showAllTasks());
+                return formatItemList(Messages.TASK_LIST_HEADING, this.tasks.showAllTasks());
             case LISTNOTES:
-                return formatItemList(NOTE_LIST_HEADING, this.notes.showAllNotes());
+                return formatItemList(Messages.NOTE_LIST_HEADING, this.notes.showAllNotes());
             case FIND:
                 return findItems(input);
             case MARK:

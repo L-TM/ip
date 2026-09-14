@@ -10,6 +10,7 @@ import min.note.Note;
 import min.task.Deadline;
 import min.task.Event;
 import min.task.Todo;
+import min.ui.Messages;
 
 /** Parses and validates commands entered by the user. */
 public class Parser {
@@ -17,26 +18,6 @@ public class Parser {
     private static final String BY_SEPARATOR = " /by ";
     private static final String FROM_SEPARATOR = " /from ";
     private static final String TO_SEPARATOR = " /to ";
-
-    private static final String INVALID_EVENT_MESSAGE =
-            "Invalid event. Use: event <description> /from <time> /to <time>.";
-    private static final String INVALID_TODO_MESSAGE =
-            "A todo needs a description. Use: todo <description>.";
-    private static final String INVALID_DEADLINE_MESSAGE =
-            "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
-    private static final String INVALID_DEADLINE_DATE_MESSAGE =
-            "Invalid deadline date. Use yyyy-mm-dd.";
-    private static final String INVALID_FIND_MESSAGE =
-            "Please provide a keyword to find.";
-    private static final String INVALID_NOTE_MESSAGE =
-            "A note needs some text. Use: note <text>.";
-    private static final String INVALID_NOTE_TEXT_MESSAGE =
-            "A note cannot contain \" | \".";
-    private static final String INVALID_TASK_TEXT_MESSAGE =
-            "Task details cannot contain \" | \".";
-    private static final String INVALID_COMMAND_MESSAGE =
-            "Invalid command. Use bye, list, listtasks, listnotes, find, mark, unmark, delete, "
-                    + "todo, deadline, event, note, or deletenote.";
 
     /**
      * Identifies the command represented by the input.
@@ -49,7 +30,7 @@ public class Parser {
         return Arrays.stream(Command.values())
                 .filter(command -> command.matches(input))
                 .findFirst()
-                .orElseThrow(() -> new MinException(INVALID_COMMAND_MESSAGE));
+                .orElseThrow(() -> new MinException(Messages.INVALID_COMMAND));
     }
 
     /**
@@ -100,29 +81,21 @@ public class Parser {
         assert itemCount >= 0 : "Item count must not be negative.";
 
         if (indexText.isEmpty()) {
-            throw new MinException("Please provide a " + itemName + " number to " + action + ".");
+            throw new MinException(Messages.missingIndex(itemName, action));
         }
 
         try {
             int itemNumber = Integer.parseInt(indexText);
             if (itemCount == 0) {
-                throw new MinException("There are no " + itemName + "s to " + action + ".");
+                throw new MinException(Messages.noItems(itemName, action));
             }
             if (itemNumber < 1 || itemNumber > itemCount) {
-                throw new MinException(
-                        capitalize(itemName) + " number must be between 1 and " + itemCount + ".");
+                throw new MinException(Messages.indexOutOfRange(itemName, itemCount));
             }
             return itemNumber - 1;
         } catch (NumberFormatException e) {
-            throw new MinException("The " + itemName + " number must be a whole number.");
+            throw new MinException(Messages.indexNotANumber(itemName));
         }
-    }
-
-    /** Returns the word with its first letter in upper case. */
-    private static String capitalize(String word) {
-        assert !word.isEmpty() : "Word to capitalize must not be empty.";
-
-        return Character.toUpperCase(word.charAt(0)) + word.substring(1);
     }
 
     /**
@@ -135,10 +108,10 @@ public class Parser {
     public Note parseNote(String input) throws MinException {
         String text = extractArguments(input, Command.NOTE);
         if (text.isEmpty()) {
-            throw new MinException(INVALID_NOTE_MESSAGE);
+            throw new MinException(Messages.INVALID_NOTE);
         }
         if (text.contains(FILE_FIELD_SEPARATOR)) {
-            throw new MinException(INVALID_NOTE_TEXT_MESSAGE);
+            throw new MinException(Messages.INVALID_NOTE_TEXT);
         }
         return new Note(text);
     }
@@ -153,7 +126,7 @@ public class Parser {
     public Todo parseTodo(String input) throws MinException {
         String description = extractArguments(input, Command.TODO);
         if (description.isEmpty()) {
-            throw new MinException(INVALID_TODO_MESSAGE);
+            throw new MinException(Messages.INVALID_TODO);
         }
         validateTaskText(description);
         return new Todo(description);
@@ -169,7 +142,7 @@ public class Parser {
     public String parseFindKeyword(String input) throws MinException {
         String keyword = extractArguments(input, Command.FIND);
         if (keyword.isEmpty()) {
-            throw new MinException(INVALID_FIND_MESSAGE);
+            throw new MinException(Messages.INVALID_FIND);
         }
         return keyword;
     }
@@ -185,13 +158,13 @@ public class Parser {
         String deadlineDetails = extractArguments(input, Command.DEADLINE);
         int byIndex = deadlineDetails.indexOf(BY_SEPARATOR);
         if (byIndex == -1) {
-            throw new MinException(INVALID_DEADLINE_MESSAGE);
+            throw new MinException(Messages.INVALID_DEADLINE);
         }
 
         String description = deadlineDetails.substring(0, byIndex).trim();
         String byText = deadlineDetails.substring(byIndex + BY_SEPARATOR.length()).trim();
         if (description.isEmpty() || byText.isEmpty()) {
-            throw new MinException(INVALID_DEADLINE_MESSAGE);
+            throw new MinException(Messages.INVALID_DEADLINE);
         }
         validateTaskText(description);
         return new Deadline(description, parseDeadlineDate(byText));
@@ -208,20 +181,20 @@ public class Parser {
         String eventDetails = extractArguments(input, Command.EVENT);
         int fromIndex = eventDetails.indexOf(FROM_SEPARATOR);
         if (fromIndex == -1 || fromIndex != eventDetails.lastIndexOf(FROM_SEPARATOR)) {
-            throw new MinException(INVALID_EVENT_MESSAGE);
+            throw new MinException(Messages.INVALID_EVENT);
         }
 
         int toIndex = eventDetails.indexOf(TO_SEPARATOR);
         if (toIndex == -1 || toIndex != eventDetails.lastIndexOf(TO_SEPARATOR)
                 || toIndex < fromIndex) {
-            throw new MinException(INVALID_EVENT_MESSAGE);
+            throw new MinException(Messages.INVALID_EVENT);
         }
 
         String description = eventDetails.substring(0, fromIndex).trim();
         String from = eventDetails.substring(fromIndex + FROM_SEPARATOR.length(), toIndex).trim();
         String to = eventDetails.substring(toIndex + TO_SEPARATOR.length()).trim();
         if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
-            throw new MinException(INVALID_EVENT_MESSAGE);
+            throw new MinException(Messages.INVALID_EVENT);
         }
         validateTaskText(description);
         validateTaskText(from);
@@ -237,7 +210,7 @@ public class Parser {
      */
     private static void validateTaskText(String text) throws MinException {
         if (text.contains(FILE_FIELD_SEPARATOR)) {
-            throw new MinException(INVALID_TASK_TEXT_MESSAGE);
+            throw new MinException(Messages.INVALID_TASK_TEXT);
         }
     }
 
@@ -261,7 +234,7 @@ public class Parser {
         try {
             return LocalDate.parse(dateText, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-            throw new MinException(INVALID_DEADLINE_DATE_MESSAGE);
+            throw new MinException(Messages.INVALID_DEADLINE_DATE);
         }
     }
 }

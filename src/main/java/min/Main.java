@@ -9,13 +9,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import min.exception.MinException;
+import min.ui.Messages;
 import min.ui.gui.MainWindow;
 
 /** Starts Min's JavaFX user interface. */
 public class Main extends Application {
-    private static final String UNEXPECTED_STARTUP_ERROR_MESSAGE =
-            "Min could not start because of an unexpected error.";
-
     @Override
     public void start(Stage stage) {
         try {
@@ -30,16 +28,16 @@ public class Main extends Application {
 
             Scene scene = new Scene(mainLayout);
             stage.setScene(scene);
-            stage.setTitle("Min");
+            stage.setTitle(Messages.APP_NAME);
             stage.setResizable(false);
             stage.show();
         } catch (MinException e) {
             showStartupError(e.getMessage());
         } catch (IOException e) {
-            showStartupError("Unable to start Min.");
+            showStartupError(Messages.STARTUP_ERROR);
         } catch (RuntimeException e) {
             e.printStackTrace();
-            showStartupError(UNEXPECTED_STARTUP_ERROR_MESSAGE);
+            showStartupError(Messages.UNEXPECTED_STARTUP_ERROR);
         }
     }
 
@@ -50,8 +48,8 @@ public class Main extends Application {
      */
     private void showStartupError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Min");
-        alert.setHeaderText("Unable to start Min");
+        alert.setTitle(Messages.APP_NAME);
+        alert.setHeaderText(Messages.STARTUP_ERROR_HEADER);
         alert.setContentText(message);
         alert.showAndWait();
     }
