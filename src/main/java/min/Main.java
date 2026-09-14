@@ -1,6 +1,7 @@
 package min;
 
 import java.io.IOException;
+import java.net.URL;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -14,6 +15,10 @@ import min.ui.gui.MainWindow;
 
 /** Starts Min's JavaFX user interface. */
 public class Main extends Application {
+    private static final String STYLESHEET_PATH = "/view/min.css";
+    private static final double MIN_WINDOW_WIDTH = 360.0;
+    private static final double MIN_WINDOW_HEIGHT = 420.0;
+
     @Override
     public void start(Stage stage) {
         try {
@@ -27,9 +32,12 @@ public class Main extends Application {
             controller.setMin(min);
 
             Scene scene = new Scene(mainLayout);
+            scene.getStylesheets().add(loadStylesheet());
+
             stage.setScene(scene);
             stage.setTitle(Messages.APP_NAME);
-            stage.setResizable(false);
+            stage.setMinWidth(MIN_WINDOW_WIDTH);
+            stage.setMinHeight(MIN_WINDOW_HEIGHT);
             stage.show();
         } catch (MinException e) {
             showStartupError(e.getMessage());
@@ -39,6 +47,21 @@ public class Main extends Application {
             e.printStackTrace();
             showStartupError(Messages.UNEXPECTED_STARTUP_ERROR);
         }
+    }
+
+    /**
+     * Returns the location of Min's stylesheet.
+     *
+     * @return The stylesheet location in the form JavaFX expects.
+     * @throws IllegalStateException If the stylesheet is missing from the build.
+     */
+    private static String loadStylesheet() {
+        URL stylesheet = Main.class.getResource(STYLESHEET_PATH);
+        if (stylesheet == null) {
+            throw new IllegalStateException("Missing stylesheet: " + STYLESHEET_PATH);
+        }
+
+        return stylesheet.toExternalForm();
     }
 
     /**

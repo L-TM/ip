@@ -19,6 +19,12 @@ import javafx.scene.layout.HBox;
  * and a label containing text from the speaker.
  */
 public class DialogBox extends HBox {
+    /**
+     * Width taken up by the avatar, the spacing beside it, and the row padding.
+     * Subtracting it keeps a bubble from stretching across the whole window.
+     */
+    private static final double AVATAR_ALLOWANCE = 90.0;
+
     @FXML
     private Label dialog;
     @FXML
@@ -39,6 +45,10 @@ public class DialogBox extends HBox {
         assert this.dialog != null : "dialog must be injected from FXML.";
         assert this.displayPicture != null
                 : "displayPicture must be injected from FXML.";
+
+        this.getStyleClass().add("dialog-box");
+        this.dialog.getStyleClass().add("dialog-text");
+        this.dialog.maxWidthProperty().bind(this.widthProperty().subtract(AVATAR_ALLOWANCE));
 
         this.dialog.setText(text);
         this.displayPicture.setImage(image);
@@ -63,7 +73,9 @@ public class DialogBox extends HBox {
      * @return The created dialog box.
      */
     public static DialogBox createUserDialog(String text, Image image) {
-        return new DialogBox(text, image);
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.dialog.getStyleClass().add("user-bubble");
+        return dialogBox;
     }
 
     /**
@@ -75,6 +87,7 @@ public class DialogBox extends HBox {
      */
     public static DialogBox createMinDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.dialog.getStyleClass().add("min-bubble");
         dialogBox.flip();
         return dialogBox;
     }

@@ -1,5 +1,7 @@
 package min.ui.gui;
 
+import java.io.InputStream;
+
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,12 +13,15 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import min.Min;
+import min.ui.Messages;
 
 /**
  * Controller for the main GUI.
  */
 public class MainWindow {
     private static final Duration EXIT_DELAY = Duration.seconds(1);
+    private static final String USER_IMAGE_PATH = "/images/UserAvatar.png";
+    private static final String MIN_IMAGE_PATH = "/images/MinAvatar.png";
 
     @FXML
     private ScrollPane scrollPane;
@@ -29,10 +34,25 @@ public class MainWindow {
 
     private Min min;
 
-    private final Image userImage = new Image(
-            this.getClass().getResourceAsStream("/images/DaUser.png"));
-    private final Image minImage = new Image(
-            this.getClass().getResourceAsStream("/images/DaDuke.png"));
+    private final Image userImage = loadImage(USER_IMAGE_PATH);
+    private final Image minImage = loadImage(MIN_IMAGE_PATH);
+
+    /**
+     * Loads an image bundled with the application.
+     *
+     * @param resourcePath The path of the image within the resources folder.
+     * @return The loaded image.
+     * @throws IllegalStateException If the image is missing from the build, which
+     *         would otherwise surface only as an unexplained startup failure.
+     */
+    private static Image loadImage(String resourcePath) {
+        InputStream imageStream = MainWindow.class.getResourceAsStream(resourcePath);
+        if (imageStream == null) {
+            throw new IllegalStateException("Missing image resource: " + resourcePath);
+        }
+
+        return new Image(imageStream);
+    }
 
     /** Keeps the conversation pane scrolled to the latest dialog. */
     @FXML
@@ -42,7 +62,12 @@ public class MainWindow {
         assert this.userInput != null : "userInput must be injected from FXML.";
         assert this.sendButton != null : "sendButton must be injected from FXML.";
 
-        scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+        // Scroll to the newest dialog whenever one is added. A listener is used rather
+        // than binding vvalue, because a bound property cannot be set by anything else
+        // and that would stop the user scrolling with a trackpad or mouse wheel.
+        this.dialogContainer.heightProperty().addListener(
+                (observable, oldHeight, newHeight) -> this.scrollPane.setVvalue(1.0));
+        this.userInput.setPromptText(Messages.INPUT_PROMPT);
     }
 
     /**
