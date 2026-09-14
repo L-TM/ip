@@ -33,7 +33,7 @@ public class Ui {
         String banner = " __  __ _       \n"
                 + "|  \\/  (_)_ __  \n"
                 + "| |\\/| | | '_ \\ \n"
-                + "| |  | | | | | | |\n"
+                + "| |  | | | | | |\n"
                 + "|_|  |_|_|_| |_|\n";
         System.out.println(banner);
         showSeparator();

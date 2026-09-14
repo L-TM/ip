@@ -12,6 +12,7 @@ import min.note.Note;
 import min.task.Deadline;
 import min.task.Event;
 import min.task.Todo;
+import min.ui.Messages;
 
 class ParserTest {
     private final Parser parser = new Parser();
@@ -50,8 +51,7 @@ class ParserTest {
 
     @Test
     void parseCommand_invalidCommands_throwsMinException() {
-        String expectedMessage = "Invalid command. Use bye, list, listtasks, listnotes, find, "
-                + "mark, unmark, delete, todo, deadline, event, note, or deletenote.";
+        String expectedMessage = Messages.invalidCommand(Command.getAllWords());
 
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand(""));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("dance"));
@@ -59,6 +59,7 @@ class ParserTest {
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("list now"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("listnotes now"));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("notes"));
+        assertThrowsMinException(expectedMessage, () -> parser.parseCommand("help me"));
     }
 
     @Test
@@ -69,53 +70,53 @@ class ParserTest {
 
     @Test
     void parseTaskIndex_missingTaskNumber_throwsMinException() {
-        assertThrowsMinException("Please provide a task number to mark.",
+        assertThrowsMinException(Messages.missingIndex("task", "mark"),
                 () -> parser.parseTaskIndex("mark", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_missingNumberWithEmptyTaskList_throwsMissingNumberException() {
-        assertThrowsMinException("Please provide a task number to mark.",
+        assertThrowsMinException(Messages.missingIndex("task", "mark"),
                 () -> parser.parseTaskIndex("mark", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_nonWholeNumber_throwsMinException() {
-        assertThrowsMinException("The task number must be a whole number.",
+        assertThrowsMinException(Messages.indexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark two", Command.MARK, 3));
-        assertThrowsMinException("The task number must be a whole number.",
+        assertThrowsMinException(Messages.indexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark 1.5", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_decimalNumberWithEmptyTaskList_throwsWholeNumberException() {
-        assertThrowsMinException("The task number must be a whole number.",
+        assertThrowsMinException(Messages.indexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark 1.5", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_emptyTaskList_throwsMinException() {
-        assertThrowsMinException("There are no tasks to mark.",
+        assertThrowsMinException(Messages.noItems("task", "mark"),
                 () -> parser.parseTaskIndex("mark 1", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_negativeNumberWithEmptyTaskList_throwsNoTasksException() {
-        assertThrowsMinException("There are no tasks to mark.",
+        assertThrowsMinException(Messages.noItems("task", "mark"),
                 () -> parser.parseTaskIndex("mark -1", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_negativeNumberWithNonEmptyTaskList_throwsRangeException() {
-        assertThrowsMinException("Task number must be between 1 and 3.",
+        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark -1", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_outOfRangeTaskNumber_throwsMinException() {
-        assertThrowsMinException("Task number must be between 1 and 3.",
+        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark 0", Command.MARK, 3));
-        assertThrowsMinException("Task number must be between 1 and 3.",
+        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark 4", Command.MARK, 3));
     }
 
@@ -129,13 +130,13 @@ class ParserTest {
 
     @Test
     void parseTodo_missingDescription_throwsMinException() {
-        assertThrowsMinException("A todo needs a description. Use: todo <description>.",
+        assertThrowsMinException(Messages.INVALID_TODO,
                 () -> parser.parseTodo("todo"));
     }
 
     @Test
     void parseTodo_descriptionContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("Task details cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_TASK_TEXT,
                 () -> parser.parseTodo("todo read | book"));
     }
 
@@ -146,7 +147,7 @@ class ParserTest {
 
     @Test
     void parseFindKeyword_missingKeyword_throwsMinException() {
-        assertThrowsMinException("Please provide a keyword to find.",
+        assertThrowsMinException(Messages.INVALID_FIND,
                 () -> parser.parseFindKeyword("find"));
     }
 
@@ -160,8 +161,7 @@ class ParserTest {
 
     @Test
     void parseDeadline_missingDetails_throwsMinException() {
-        String expectedMessage =
-                "Invalid deadline. Use: deadline <description> /by yyyy-mm-dd.";
+        String expectedMessage = Messages.INVALID_DEADLINE;
 
         assertThrowsMinException(expectedMessage,
                 () -> parser.parseDeadline("deadline submit report"));
@@ -173,7 +173,7 @@ class ParserTest {
 
     @Test
     void parseDeadline_invalidDate_throwsMinException() {
-        String expectedMessage = "Invalid deadline date. Use yyyy-mm-dd.";
+        String expectedMessage = Messages.INVALID_DEADLINE_DATE;
 
         assertThrowsMinException(expectedMessage,
                 () -> parser.parseDeadline("deadline submit report /by 28-08-2026"));
@@ -183,7 +183,7 @@ class ParserTest {
 
     @Test
     void parseDeadline_descriptionContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("Task details cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_TASK_TEXT,
                 () -> parser.parseDeadline(
                         "deadline submit | report /by 2026-08-28"));
     }
@@ -198,8 +198,7 @@ class ParserTest {
 
     @Test
     void parseEvent_missingDetails_throwsMinException() {
-        String expectedMessage =
-                "Invalid event. Use: event <description> /from <time> /to <time>.";
+        String expectedMessage = Messages.INVALID_EVENT;
 
         assertThrowsMinException(expectedMessage,
                 () -> parser.parseEvent("event meeting"));
@@ -215,35 +214,33 @@ class ParserTest {
 
     @Test
     void parseEvent_repeatedFromSeparator_throwsMinException() {
-        assertThrowsMinException(
-                "Invalid event. Use: event <description> /from <time> /to <time>.",
+        assertThrowsMinException(Messages.INVALID_EVENT,
                 () -> parser.parseEvent("event meeting /from 2pm /from 3pm /to 4pm"));
     }
 
     @Test
     void parseEvent_repeatedToSeparator_throwsMinException() {
-        assertThrowsMinException(
-                "Invalid event. Use: event <description> /from <time> /to <time>.",
+        assertThrowsMinException(Messages.INVALID_EVENT,
                 () -> parser.parseEvent("event meeting /from 2pm /to 4pm /to 5pm"));
     }
 
     @Test
     void parseEvent_descriptionContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("Task details cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_TASK_TEXT,
                 () -> parser.parseEvent(
                         "event team | meeting /from 2pm /to 4pm"));
     }
 
     @Test
     void parseEvent_startTimeContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("Task details cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_TASK_TEXT,
                 () -> parser.parseEvent(
                         "event meeting /from Friday | 2pm /to 4pm"));
     }
 
     @Test
     void parseEvent_endTimeContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("Task details cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_TASK_TEXT,
                 () -> parser.parseEvent(
                         "event meeting /from 2pm /to Friday | 4pm"));
     }
@@ -263,7 +260,7 @@ class ParserTest {
 
     @Test
     void parseNote_missingText_throwsMinException() {
-        String expectedMessage = "A note needs some text. Use: note <text>.";
+        String expectedMessage = Messages.INVALID_NOTE;
 
         assertThrowsMinException(expectedMessage, () -> parser.parseNote("note"));
         assertThrowsMinException(expectedMessage, () -> parser.parseNote("note    "));
@@ -271,7 +268,7 @@ class ParserTest {
 
     @Test
     void parseNote_textContainingFieldSeparator_throwsMinException() {
-        assertThrowsMinException("A note cannot contain \" | \".",
+        assertThrowsMinException(Messages.INVALID_NOTE_TEXT,
                 () -> parser.parseNote("note watch Dune | part two"));
     }
 
@@ -283,19 +280,19 @@ class ParserTest {
 
     @Test
     void parseNoteIndex_missingNoteNumber_throwsMinException() {
-        assertThrowsMinException("Please provide a note number to delete.",
+        assertThrowsMinException(Messages.missingIndex("note", "delete"),
                 () -> parser.parseNoteIndex("deletenote", 3));
     }
 
     @Test
     void parseNoteIndex_nonNumericNoteNumber_throwsMinException() {
-        assertThrowsMinException("The note number must be a whole number.",
+        assertThrowsMinException(Messages.indexNotANumber("note"),
                 () -> parser.parseNoteIndex("deletenote first", 3));
     }
 
     @Test
     void parseNoteIndex_noteNumberOutsideList_throwsMinException() {
-        String expectedMessage = "Note number must be between 1 and 3.";
+        String expectedMessage = Messages.indexOutOfRange("note", 3);
 
         assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 0", 3));
         assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 4", 3));
@@ -303,7 +300,7 @@ class ParserTest {
 
     @Test
     void parseNoteIndex_emptyNoteList_throwsMinException() {
-        assertThrowsMinException("There are no notes to delete.",
+        assertThrowsMinException(Messages.noItems("note", "delete"),
                 () -> parser.parseNoteIndex("deletenote 1", 0));
     }
 

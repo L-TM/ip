@@ -1,7 +1,11 @@
 package min.command;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /** Represents a command recognized by Min. */
 public enum Command {
+    HELP("help", false),
     BYE("bye", false),
     LIST("list", false),
     LISTTASKS("listtasks", false),
@@ -22,6 +26,18 @@ public enum Command {
     Command(String word, boolean acceptsArguments) {
         this.word = word;
         this.acceptsArguments = acceptsArguments;
+    }
+
+    /**
+     * Returns every command word, separated by commas.
+     *
+     * <p>Deriving the list here keeps messages that list the commands from going
+     * stale when a command is added to this enum.
+     */
+    public static String getAllWords() {
+        return Arrays.stream(values())
+                .map(Command::getWord)
+                .collect(Collectors.joining(", "));
     }
 
     /** Returns the word used to enter this command. */
