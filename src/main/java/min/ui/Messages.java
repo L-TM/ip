@@ -81,7 +81,7 @@ public final class Messages {
      *
      * @param commandWords Every command word Min accepts, separated by commas.
      */
-    public static String invalidCommand(String commandWords) {
+    public static String formatInvalidCommand(String commandWords) {
         return "Hmm, don't know that one. I speak: " + commandWords + ".";
     }
 
@@ -91,7 +91,7 @@ public final class Messages {
      * @param taskText The added task as it is displayed.
      * @param taskCount The number of tasks now in the list.
      */
-    public static String addedTask(String taskText, int taskCount) {
+    public static String formatAddedTask(String taskText, int taskCount) {
         return "Bet. Added to the pile:\n"
                 + "   " + taskText + "\n"
                 + "That's " + plural(taskCount, "task")
@@ -104,7 +104,7 @@ public final class Messages {
      * @param noteText The added note as it is displayed.
      * @param noteCount The number of notes now in the list.
      */
-    public static String addedNote(String noteText, int noteCount) {
+    public static String formatAddedNote(String noteText, int noteCount) {
         return "Cool, wrote it down:\n"
                 + "   " + noteText + "\n"
                 + "That's " + plural(noteCount, "note") + ". Your brain thanks you.";
@@ -115,7 +115,7 @@ public final class Messages {
      *
      * @param taskText The marked task as it is displayed.
      */
-    public static String markedTask(String taskText) {
+    public static String formatMarkedTask(String taskText) {
         return "W. Nice, one down:\n"
                 + "   " + taskText;
     }
@@ -125,7 +125,7 @@ public final class Messages {
      *
      * @param taskText The unmarked task as it is displayed.
      */
-    public static String unmarkedTask(String taskText) {
+    public static String formatUnmarkedTask(String taskText) {
         return "Back on the pile it goes. Happens:\n"
                 + "   " + taskText;
     }
@@ -136,7 +136,7 @@ public final class Messages {
      * @param taskText The deleted task as it is displayed.
      * @param taskCount The number of tasks left in the list.
      */
-    public static String removedTask(String taskText, int taskCount) {
+    public static String formatRemovedTask(String taskText, int taskCount) {
         return "Poof. Gone:\n"
                 + "   " + taskText + "\n"
                 + plural(taskCount, "task") + " left. Lighter already.";
@@ -148,7 +148,7 @@ public final class Messages {
      * @param noteText The deleted note as it is displayed.
      * @param noteCount The number of notes left in the list.
      */
-    public static String removedNote(String noteText, int noteCount) {
+    public static String formatRemovedNote(String noteText, int noteCount) {
         return "Tossed it:\n"
                 + "   " + noteText + "\n"
                 + plural(noteCount, "note") + " left.";
@@ -159,7 +159,7 @@ public final class Messages {
      *
      * @param details The reason the saved data was rejected.
      */
-    public static String corruptedTaskData(String details) {
+    public static String formatCorruptedTaskData(String details) {
         return "Your saved tasks look scrambled. Fix or delete data/min.txt. Details: " + details;
     }
 
@@ -168,7 +168,7 @@ public final class Messages {
      *
      * @param details The reason the saved data was rejected.
      */
-    public static String corruptedNoteData(String details) {
+    public static String formatCorruptedNoteData(String details) {
         return "Your saved notes look scrambled. Fix or delete data/notes.txt. Details: " + details;
     }
 
@@ -178,7 +178,7 @@ public final class Messages {
      * @param itemName The singular name of the item, such as "task".
      * @param action The action the number was needed for, such as "mark".
      */
-    public static String missingIndex(String itemName, String action) {
+    public static String formatMissingIndex(String itemName, String action) {
         return "Which " + itemName + "? Give me a number to " + action + ".";
     }
 
@@ -188,7 +188,7 @@ public final class Messages {
      * @param itemName The singular name of the item, such as "task".
      * @param action The action that could not be performed, such as "mark".
      */
-    public static String noItems(String itemName, String action) {
+    public static String formatNoItems(String itemName, String action) {
         return "No " + itemName + "s to " + action + ". Nothing to do here.";
     }
 
@@ -198,7 +198,7 @@ public final class Messages {
      * @param itemName The singular name of the item, such as "task".
      * @param itemCount The number of items the number may refer to.
      */
-    public static String indexOutOfRange(String itemName, int itemCount) {
+    public static String formatIndexOutOfRange(String itemName, int itemCount) {
         return "Pick a " + itemName + " number between 1 and " + itemCount + ".";
     }
 
@@ -207,7 +207,7 @@ public final class Messages {
      *
      * @param itemName The singular name of the item, such as "task".
      */
-    public static String indexNotANumber(String itemName) {
+    public static String formatIndexNotANumber(String itemName) {
         return "That " + itemName + " number needs to be a whole number. I'm not that clever.";
     }
 

@@ -12,7 +12,9 @@ import min.task.Event;
 import min.task.Todo;
 import min.ui.Messages;
 
-/** Parses and validates commands entered by the user. */
+/**
+ * Parses and validates commands entered by the user.
+ */
 public class Parser {
     private static final String FILE_FIELD_SEPARATOR = " | ";
     private static final String BY_SEPARATOR = " /by ";
@@ -31,7 +33,7 @@ public class Parser {
                 .filter(command -> command.matches(input))
                 .findFirst()
                 .orElseThrow(() -> new MinException(
-                        Messages.invalidCommand(Command.getAllWords())));
+                        Messages.formatInvalidCommand(Command.getAllWords())));
     }
 
     /**
@@ -82,20 +84,20 @@ public class Parser {
         assert itemCount >= 0 : "Item count must not be negative.";
 
         if (indexText.isEmpty()) {
-            throw new MinException(Messages.missingIndex(itemName, action));
+            throw new MinException(Messages.formatMissingIndex(itemName, action));
         }
 
         try {
             int itemNumber = Integer.parseInt(indexText);
             if (itemCount == 0) {
-                throw new MinException(Messages.noItems(itemName, action));
+                throw new MinException(Messages.formatNoItems(itemName, action));
             }
             if (itemNumber < 1 || itemNumber > itemCount) {
-                throw new MinException(Messages.indexOutOfRange(itemName, itemCount));
+                throw new MinException(Messages.formatIndexOutOfRange(itemName, itemCount));
             }
             return itemNumber - 1;
         } catch (NumberFormatException e) {
-            throw new MinException(Messages.indexNotANumber(itemName));
+            throw new MinException(Messages.formatIndexNotANumber(itemName));
         }
     }
 

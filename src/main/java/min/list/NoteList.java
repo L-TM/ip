@@ -4,7 +4,9 @@ import java.util.List;
 
 import min.note.Note;
 
-/** Stores and updates Min's notes. */
+/**
+ * Stores and updates Min's notes.
+ */
 public class NoteList extends ItemList<Note> {
     /**
      * Creates a note list whose initial displayed view contains every note.

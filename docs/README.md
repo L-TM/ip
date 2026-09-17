@@ -46,16 +46,15 @@ You can also run Min directly from the source project using `./gradlew run`, or 
 - Commands are case-sensitive: use `todo`, not `TODO`.
 - Enter one command per line. Separate the command word from its arguments with a space.
 - Keep spaces around `/by`, `/from`, and `/to`, and use them in the order shown.
-- Descriptions, note text, and event start and end values must not be empty or contain the exact sequence `  |  ` (a vertical bar with a space on either side).
+- Descriptions, note text, and event start and end values must not be empty or contain the exact sequence `' | '` (a vertical bar with a space on either side).
 - Commands without arguments, such as `help` and `list`, must be entered on their own.
 
 ### Understanding item numbers
 
-Tasks and notes have **separate numbered lists**, each starting at 1. Use a number from the relevant current list:
+Tasks and notes have **separate numbered lists**, each starting at 1. Commands that use an index act on the most
+recently displayed relevant list. `mark`, `unmark`, and `delete` use the latest task list, while `deletenote` uses the
+latest note list. After `find`, they use the numbering shown in those search results.
 
-- `mark`, `unmark`, and `delete` use task numbers.
-- `deletenote` uses note numbers.
-- After `find`, numbers refer to the search results.
 - `list` restores both complete lists. `listtasks` restores only the task list; `listnotes` restores only the note list.
 - Deleting an item shifts later numbers down. Run `list` or repeat your search to see the updated numbers before selecting another item.
 - Adding an item after a search does not refresh the search results. Run `list` or repeat `find` to see it.

@@ -36,7 +36,7 @@ class MinTest {
         MinException exception = assertThrows(MinException.class,
                 () -> new Min(taskStorage, new LoadingNoteStorage(List.of())));
 
-        assertEquals(Messages.corruptedTaskData("Invalid task status."),
+        assertEquals(Messages.formatCorruptedTaskData("Invalid task status."),
                 exception.getMessage());
     }
 
@@ -59,7 +59,7 @@ class MinTest {
         MinException exception = assertThrows(MinException.class,
                 () -> new Min(new LoadingTaskStorage(List.of()), noteStorage));
 
-        assertEquals(Messages.corruptedNoteData("Note text cannot be blank."),
+        assertEquals(Messages.formatCorruptedNoteData("Note text cannot be blank."),
                 exception.getMessage());
     }
 
@@ -122,7 +122,7 @@ class MinTest {
 
         String response = min.getResponse("todo read book");
 
-        assertEquals(Messages.addedTask("[T][ ] read book", 1), response);
+        assertEquals(Messages.formatAddedTask("[T][ ] read book", 1), response);
         assertEquals("T | 0 | read book", tasks.getTasks().get(0).toFileString());
         assertEquals(1, storage.getSaveCount());
     }
@@ -144,7 +144,7 @@ class MinTest {
 
         String response = min.getResponse("deadline submit report /by 2026-08-28");
 
-        assertEquals(Messages.addedTask("[D][ ] submit report (by: Aug 28 2026)", 1), response);
+        assertEquals(Messages.formatAddedTask("[D][ ] submit report (by: Aug 28 2026)", 1), response);
         assertEquals("D | 0 | submit report | 2026-08-28",
                 tasks.getTasks().get(0).toFileString());
         assertEquals(1, storage.getSaveCount());
@@ -157,7 +157,7 @@ class MinTest {
 
         String response = min.getResponse("event meeting /from 2pm /to 4pm");
 
-        assertEquals(Messages.addedTask("[E][ ] meeting (from: 2pm to: 4pm)", 1), response);
+        assertEquals(Messages.formatAddedTask("[E][ ] meeting (from: 2pm to: 4pm)", 1), response);
         assertEquals("E | 0 | meeting | 2pm | 4pm",
                 tasks.getTasks().get(0).toFileString());
         assertEquals(1, storage.getSaveCount());
@@ -170,7 +170,7 @@ class MinTest {
 
         String response = min.getResponse("mark 1");
 
-        assertEquals(Messages.markedTask("[T][X] read book"), response);
+        assertEquals(Messages.formatMarkedTask("[T][X] read book"), response);
         assertTrue(task.isDone());
         assertEquals(1, storage.getSaveCount());
     }
@@ -183,7 +183,7 @@ class MinTest {
 
         String response = min.getResponse("unmark 1");
 
-        assertEquals(Messages.unmarkedTask("[T][ ] read book"), response);
+        assertEquals(Messages.formatUnmarkedTask("[T][ ] read book"), response);
         assertFalse(task.isDone());
         assertEquals(1, storage.getSaveCount());
     }
@@ -197,7 +197,7 @@ class MinTest {
 
         String response = min.getResponse("delete 1");
 
-        assertEquals(Messages.removedTask("[T][ ] read book", 1), response);
+        assertEquals(Messages.formatRemovedTask("[T][ ] read book", 1), response);
         assertEquals(List.of(remainingTask), tasks.getTasks());
         assertEquals(1, storage.getSaveCount());
     }
@@ -270,7 +270,7 @@ class MinTest {
 
         String response = min.getResponse("note watch Dune");
 
-        assertEquals(Messages.addedNote("watch Dune", 1), response);
+        assertEquals(Messages.formatAddedNote("watch Dune", 1), response);
         assertEquals("N | watch Dune", notes.getNotes().get(0).toFileString());
         assertEquals(1, noteStorage.getSaveCount());
         assertEquals(0, storage.getSaveCount());
@@ -351,7 +351,7 @@ class MinTest {
 
         String response = min.getResponse("deletenote 1");
 
-        assertEquals(Messages.removedNote("watch Dune", 1), response);
+        assertEquals(Messages.formatRemovedNote("watch Dune", 1), response);
         assertEquals(List.of(remainingNote), notes.getNotes());
         assertEquals(1, noteStorage.getSaveCount());
     }
@@ -378,7 +378,7 @@ class MinTest {
 
         String response = min.getResponse("deletenote 2");
 
-        assertEquals(Messages.indexOutOfRange("note", 1), response);
+        assertEquals(Messages.formatIndexOutOfRange("note", 1), response);
         assertEquals(2, notes.size());
     }
 
@@ -386,7 +386,7 @@ class MinTest {
     void getResponse_deletenoteWithEmptyNoteList_returnsError() {
         Min min = createMin(new TaskList(List.of()));
 
-        assertEquals(Messages.noItems("note", "delete"), min.getResponse("deletenote 1"));
+        assertEquals(Messages.formatNoItems("note", "delete"), min.getResponse("deletenote 1"));
     }
 
     @Test
@@ -415,7 +415,7 @@ class MinTest {
 
         String response = min.getResponse("mark 3");
 
-        assertEquals(Messages.indexOutOfRange("task", 2), response);
+        assertEquals(Messages.formatIndexOutOfRange("task", 2), response);
         assertFalse(secondMatch.isDone());
     }
 

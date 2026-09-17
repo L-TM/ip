@@ -1,6 +1,8 @@
 package min.task;
 
-/** Represents a task that can be marked as complete and saved to storage. */
+/**
+ * Represents a task that can be marked as complete and saved to storage.
+ */
 public abstract class Task {
     protected static final String FILE_FIELD_SEPARATOR = " | ";
 

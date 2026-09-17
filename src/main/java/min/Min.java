@@ -15,7 +15,9 @@ import min.storage.TaskStorage;
 import min.task.Task;
 import min.ui.Messages;
 
-/** Processes commands and manages Min's task data. */
+/**
+ * Processes commands and manages Min's task data.
+ */
 public class Min {
     private static final String SECTION_SEPARATOR = "\n\n";
 
@@ -92,7 +94,7 @@ public class Min {
         } catch (DateTimeParseException e) {
             throw new MinException(Messages.INVALID_SAVED_DEADLINE_DATE);
         } catch (IllegalArgumentException e) {
-            throw new MinException(Messages.corruptedTaskData(e.getMessage()));
+            throw new MinException(Messages.formatCorruptedTaskData(e.getMessage()));
         }
     }
 
@@ -108,7 +110,7 @@ public class Min {
         try {
             return new NoteList(storage.load());
         } catch (IllegalArgumentException e) {
-            throw new MinException(Messages.corruptedNoteData(e.getMessage()));
+            throw new MinException(Messages.formatCorruptedNoteData(e.getMessage()));
         }
     }
 
@@ -123,7 +125,7 @@ public class Min {
         this.tasks.addTask(task);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return Messages.addedTask(task.toString(), this.tasks.size());
+        return Messages.formatAddedTask(task.toString(), this.tasks.size());
     }
 
     /** Returns Min's welcome message. */
@@ -219,7 +221,7 @@ public class Min {
         this.notes.addNote(note);
         this.noteStorage.save(this.notes.getNotes());
 
-        return Messages.addedNote(note.toString(), this.notes.size());
+        return Messages.formatAddedNote(note.toString(), this.notes.size());
     }
 
     /**
@@ -235,7 +237,7 @@ public class Min {
         Note deletedNote = this.notes.deleteNote(noteIndex);
         this.noteStorage.save(this.notes.getNotes());
 
-        return Messages.removedNote(deletedNote.toString(), this.notes.size());
+        return Messages.formatRemovedNote(deletedNote.toString(), this.notes.size());
     }
 
     /**
@@ -252,7 +254,7 @@ public class Min {
         Task markedTask = this.tasks.markTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return Messages.markedTask(markedTask.toString());
+        return Messages.formatMarkedTask(markedTask.toString());
     }
 
     /**
@@ -269,7 +271,7 @@ public class Min {
         Task unmarkedTask = this.tasks.unmarkTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return Messages.unmarkedTask(unmarkedTask.toString());
+        return Messages.formatUnmarkedTask(unmarkedTask.toString());
     }
 
     /**
@@ -286,7 +288,7 @@ public class Min {
         Task deletedTask = this.tasks.deleteTask(taskIndex);
         this.taskStorage.save(this.tasks.getTasks());
 
-        return Messages.removedTask(deletedTask.toString(), this.tasks.size());
+        return Messages.formatRemovedTask(deletedTask.toString(), this.tasks.size());
     }
 
     /**

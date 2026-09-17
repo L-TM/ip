@@ -1,6 +1,8 @@
 package min.task;
 
-/** Represents a task that occurs between a specified start and end time. */
+/**
+ * Represents a task that occurs between a specified start and end time.
+ */
 public class Event extends Task {
 
     private final String startTime;

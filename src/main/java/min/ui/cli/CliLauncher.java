@@ -6,7 +6,9 @@ import min.Min;
 import min.exception.MinException;
 import min.ui.Messages;
 
-/** Starts the command-line version of Min. */
+/**
+ * Starts the command-line version of Min.
+ */
 public class CliLauncher {
     /**
      * Starts Min using standard input and output.
