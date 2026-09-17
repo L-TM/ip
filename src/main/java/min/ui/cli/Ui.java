@@ -2,7 +2,9 @@ package min.ui.cli;
 
 import java.util.Scanner;
 
-/** Handles Min's console input and output. */
+/**
+ * Handles Min's console input and output.
+ */
 public class Ui {
     private static final int SEPARATOR_LENGTH = 60;
     private static final String SEPARATOR = "_".repeat(SEPARATOR_LENGTH);

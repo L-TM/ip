@@ -51,7 +51,7 @@ class ParserTest {
 
     @Test
     void parseCommand_invalidCommands_throwsMinException() {
-        String expectedMessage = Messages.invalidCommand(Command.getAllWords());
+        String expectedMessage = Messages.formatInvalidCommand(Command.getAllWords());
 
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand(""));
         assertThrowsMinException(expectedMessage, () -> parser.parseCommand("dance"));
@@ -70,53 +70,53 @@ class ParserTest {
 
     @Test
     void parseTaskIndex_missingTaskNumber_throwsMinException() {
-        assertThrowsMinException(Messages.missingIndex("task", "mark"),
+        assertThrowsMinException(Messages.formatMissingIndex("task", "mark"),
                 () -> parser.parseTaskIndex("mark", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_missingNumberWithEmptyTaskList_throwsMissingNumberException() {
-        assertThrowsMinException(Messages.missingIndex("task", "mark"),
+        assertThrowsMinException(Messages.formatMissingIndex("task", "mark"),
                 () -> parser.parseTaskIndex("mark", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_nonWholeNumber_throwsMinException() {
-        assertThrowsMinException(Messages.indexNotANumber("task"),
+        assertThrowsMinException(Messages.formatIndexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark two", Command.MARK, 3));
-        assertThrowsMinException(Messages.indexNotANumber("task"),
+        assertThrowsMinException(Messages.formatIndexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark 1.5", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_decimalNumberWithEmptyTaskList_throwsWholeNumberException() {
-        assertThrowsMinException(Messages.indexNotANumber("task"),
+        assertThrowsMinException(Messages.formatIndexNotANumber("task"),
                 () -> parser.parseTaskIndex("mark 1.5", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_emptyTaskList_throwsMinException() {
-        assertThrowsMinException(Messages.noItems("task", "mark"),
+        assertThrowsMinException(Messages.formatNoItems("task", "mark"),
                 () -> parser.parseTaskIndex("mark 1", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_negativeNumberWithEmptyTaskList_throwsNoTasksException() {
-        assertThrowsMinException(Messages.noItems("task", "mark"),
+        assertThrowsMinException(Messages.formatNoItems("task", "mark"),
                 () -> parser.parseTaskIndex("mark -1", Command.MARK, 0));
     }
 
     @Test
     void parseTaskIndex_negativeNumberWithNonEmptyTaskList_throwsRangeException() {
-        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
+        assertThrowsMinException(Messages.formatIndexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark -1", Command.MARK, 3));
     }
 
     @Test
     void parseTaskIndex_outOfRangeTaskNumber_throwsMinException() {
-        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
+        assertThrowsMinException(Messages.formatIndexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark 0", Command.MARK, 3));
-        assertThrowsMinException(Messages.indexOutOfRange("task", 3),
+        assertThrowsMinException(Messages.formatIndexOutOfRange("task", 3),
                 () -> parser.parseTaskIndex("mark 4", Command.MARK, 3));
     }
 
@@ -280,19 +280,19 @@ class ParserTest {
 
     @Test
     void parseNoteIndex_missingNoteNumber_throwsMinException() {
-        assertThrowsMinException(Messages.missingIndex("note", "delete"),
+        assertThrowsMinException(Messages.formatMissingIndex("note", "delete"),
                 () -> parser.parseNoteIndex("deletenote", 3));
     }
 
     @Test
     void parseNoteIndex_nonNumericNoteNumber_throwsMinException() {
-        assertThrowsMinException(Messages.indexNotANumber("note"),
+        assertThrowsMinException(Messages.formatIndexNotANumber("note"),
                 () -> parser.parseNoteIndex("deletenote first", 3));
     }
 
     @Test
     void parseNoteIndex_noteNumberOutsideList_throwsMinException() {
-        String expectedMessage = Messages.indexOutOfRange("note", 3);
+        String expectedMessage = Messages.formatIndexOutOfRange("note", 3);
 
         assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 0", 3));
         assertThrowsMinException(expectedMessage, () -> parser.parseNoteIndex("deletenote 4", 3));
@@ -300,7 +300,7 @@ class ParserTest {
 
     @Test
     void parseNoteIndex_emptyNoteList_throwsMinException() {
-        assertThrowsMinException(Messages.noItems("note", "delete"),
+        assertThrowsMinException(Messages.formatNoItems("note", "delete"),
                 () -> parser.parseNoteIndex("deletenote 1", 0));
     }
 

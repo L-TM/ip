@@ -2,7 +2,9 @@ package min;
 
 import javafx.application.Application;
 
-/** Launches Min's JavaFX application without JavaFX classpath conflicts. */
+/**
+ * Launches Min's JavaFX application without JavaFX classpath conflicts.
+ */
 public class Launcher {
     /**
      * Starts the JavaFX application.

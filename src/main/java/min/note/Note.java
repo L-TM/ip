@@ -1,6 +1,8 @@
 package min.note;
 
-/** Represents a short snippet of text that the user wants to remember. */
+/**
+ * Represents a short snippet of text that the user wants to remember.
+ */
 public class Note {
     private static final String FILE_TYPE_VALUE = "N";
     private static final String FILE_FIELD_SEPARATOR = " | ";

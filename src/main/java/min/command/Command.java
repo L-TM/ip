@@ -3,7 +3,9 @@ package min.command;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-/** Represents a command recognized by Min. */
+/**
+ * Represents a command recognized by Min.
+ */
 public enum Command {
     HELP("help", false),
     BYE("bye", false),
@@ -21,11 +23,11 @@ public enum Command {
     DELETENOTE("deletenote", true);
 
     private final String word;
-    private final boolean acceptsArguments;
+    private final boolean canHaveArguments;
 
-    Command(String word, boolean acceptsArguments) {
+    Command(String word, boolean canHaveArguments) {
         this.word = word;
-        this.acceptsArguments = acceptsArguments;
+        this.canHaveArguments = canHaveArguments;
     }
 
     /**
@@ -52,7 +54,7 @@ public enum Command {
      * @return Whether the input matches this command.
      */
     public boolean matches(String input) {
-        if (!this.acceptsArguments) {
+        if (!this.canHaveArguments) {
             return input.equals(this.word);
         }
         return input.equals(this.word) || input.startsWith(this.word + " ");

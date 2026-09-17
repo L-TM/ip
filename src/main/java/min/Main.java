@@ -2,6 +2,7 @@ package min;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,7 +14,9 @@ import min.exception.MinException;
 import min.ui.Messages;
 import min.ui.gui.MainWindow;
 
-/** Starts Min's JavaFX user interface. */
+/**
+ * Starts Min's JavaFX user interface.
+ */
 public class Main extends Application {
     private static final String STYLESHEET_PATH = "/view/min.css";
     private static final double MIN_WINDOW_WIDTH = 360.0;

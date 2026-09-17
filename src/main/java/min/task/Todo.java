@@ -1,8 +1,16 @@
 package min.task;
 
-/** Represents a task without a date or time. */
+/**
+ * Represents a task without a date or time.
+ */
 public class Todo extends Task {
 
+    /**
+     * Creates an incomplete todo with the given description.
+     *
+     * @param description The todo description. Must not be null, blank, or contain the
+     *                    storage field separator.
+     */
     public Todo(String description) {
         super(description);
     }

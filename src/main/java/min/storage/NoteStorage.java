@@ -4,7 +4,9 @@ import java.nio.file.Path;
 
 import min.note.Note;
 
-/** Saves and loads Min notes on the hard disk. */
+/**
+ * Saves and loads Min notes on the hard disk.
+ */
 public class NoteStorage extends Storage<Note> {
     private static final Path DEFAULT_FILE_PATH = Path.of("data", "notes.txt");
     private static final String FIELD_SEPARATOR_REGEX = " \\| ";

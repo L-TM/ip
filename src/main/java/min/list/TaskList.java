@@ -4,7 +4,9 @@ import java.util.List;
 
 import min.task.Task;
 
-/** Stores and updates Min's tasks. */
+/**
+ * Stores and updates Min's tasks.
+ */
 public class TaskList extends ItemList<Task> {
     /**
      * Creates a task list whose initial displayed view contains every task.
