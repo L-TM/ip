@@ -46,7 +46,7 @@ You can also run Min directly from the source project using `./gradlew run`, or 
 - Commands are case-sensitive: use `todo`, not `TODO`.
 - Enter one command per line. Separate the command word from its arguments with a space.
 - Keep spaces around `/by`, `/from`, and `/to`, and use them in the order shown.
-- Descriptions, note text, and event start and end values must not be empty or contain the exact sequence `  |  ` (a vertical bar with a space on either side).
+- Descriptions, note text, and event start and end values must not be empty or contain the exact sequence `' | '` (a vertical bar with a space on either side).
 - Commands without arguments, such as `help` and `list`, must be entered on their own.
 
 ### Understanding item numbers
